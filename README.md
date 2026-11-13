@@ -19,6 +19,7 @@
 |---|---|
 | ![面板](assets/preview/panel_main.png) | ![适配器](assets/preview/panel_adapters.png) |
 
+> 截图数据来自真实设备（TCL 65Q10K）；「实时画面」为占位图——截图时暂停了 MJPEG 流，避免暴露电视画面。
 > 面板是纯网页：手机 / iPad 打开同一地址即可，可「添加到主屏幕」当 App 用。
 
 ## 特性
