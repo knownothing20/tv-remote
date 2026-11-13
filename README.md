@@ -3,7 +3,7 @@
 > 仓库：<https://github.com/knownothing20/tv-remote> · 最新版见 [Releases](https://github.com/knownothing20/tv-remote/releases)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-1.5.0-blue)
+![Version](https://img.shields.io/badge/version-1.5.1-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3.11)
 
@@ -78,6 +78,16 @@ docker run -d --name tv-remote -p 8777:8777 \
 
 镜像：`ghcr.io/knownothing20/tv-remote`（`amd64` / `arm64`，同时提供 `:vX.Y.Z` 版本标签）。
 部署细节、adb 授权与排错见 [docs/DOCKER.md](docs/DOCKER.md)。
+
+## 常用操作（Windows 桌面版）
+
+| 想做的事 | 双击 |
+|---|---|
+| 启动托盘 | `TrayTVAdmin.lnk`（或 `Start-Tray.cmd` 备用） |
+| 更新到最新版 | `Update-Latest.cmd`（从 GitHub Releases 下载并替换，自动结束正在运行的托盘） |
+
+`TrayTVAdmin.lnk` 固定指向仓库根目录的 `TrayTVAdmin.exe`，更新脚本会替换这个文件，
+因此**快捷方式永远是当前最新版**。本地版本号写在 `local/version.txt`。
 
 ## 本地数据与隐私
 

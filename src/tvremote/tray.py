@@ -169,7 +169,7 @@ def run_tray(config: Config):
 
 def selftest(config: Config) -> dict:
     """无界面自检：验证服务、设备连通、托盘后端可加载。"""
-    result: dict = {"device": privacy.mask_device(config.device)}
+    result: dict = {"version": __version__, "device": privacy.mask_device(config.device)}
     backend = Backend(config)
     result["backend_started"] = backend.start()
     result["port_open"] = port_open(config.port)

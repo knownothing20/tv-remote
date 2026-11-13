@@ -3,6 +3,18 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.5.1] - 2026-11-13
+
+补丁：为「一键更新」提供本地版本标识。
+
+### Added
+
+- 启动时写入 `local/version.txt`，供 `Update-Latest.ps1` 比对本地版本
+- `--selftest` 输出新增 `version` 字段
+- 仓库提供 `Update-Latest.ps1` / `Update-Latest.cmd`（下载并替换为 GitHub 最新 Release）
+- `scripts/make_shortcut.py`：不依赖 COM 生成 `.lnk` 快捷方式
+- `Start-Tray.cmd`：备用启动器
+
 ## [1.5.0] - 2026-11-13
 
 面板体验。

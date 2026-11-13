@@ -17,6 +17,7 @@ from .config import (
     load_config,
     load_devices,
     load_settings,
+    local_dir,
     remove_device,
     resource_path,
     set_active_device,
@@ -40,6 +41,11 @@ def init(config: Config | None = None) -> Config:
     _cfg = config or load_config()
     _adb = Adb(_cfg.device, _cfg.adb)
     _cache = {}
+    try:  # 供一键更新脚本读取本地版本
+        with open(os.path.join(local_dir(), "version.txt"), "w", encoding="utf-8") as f:
+            f.write(__version__ + "\n")
+    except Exception:
+        pass
     return _cfg
 
 
