@@ -5,481 +5,769 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>电视管理后台</title>
 <link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="#0d1117">
+<meta name="theme-color" content="#0b0f14">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <style>
-:root{--bg:#0d1117;--card:#161b22;--line:#21262d;--txt:#e6edf3;--dim:#8b949e;--acc:#58a6ff;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--btn:#21262d;--btnline:#30363d;--hover:#30363d;--dash:#1d2229;--chart:#58a6ff}
-html[data-theme="light"]{--bg:#f4f6f8;--card:#ffffff;--line:#e3e7ec;--txt:#1f2328;--dim:#6b7280;--acc:#1f6feb;--ok:#1a7f37;--warn:#9a6700;--bad:#cf222e;--btn:#f2f4f7;--btnline:#d8dde3;--hover:#e9edf2;--dash:#eceff3;--chart:#1f6feb}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--txt);font:14px/1.5 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif;padding:20px}
-header{display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap}
-h1{font-size:20px;font-weight:600}
-.badge{font-size:12px;padding:3px 9px;border-radius:20px;border:1px solid var(--line)}
-.on{color:var(--ok);border-color:#238636}
-.off{color:var(--bad);border-color:#6e2c2c}
+:root{
+  --bg:#0b0f14; --card:#121820; --card2:#0e141b; --line:#1e2732; --line2:#141c25;
+  --txt:#e6edf3; --dim:#8b98a9; --dim2:#5f6b7a;
+  --acc:#58a6ff; --acc2:#1f6feb; --ok:#3fb950; --warn:#d29922; --bad:#f85149;
+  --btn:#1a222c; --btnline:#26313d; --hover:#212b36;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  --radius:12px;
+}
+html[data-theme="light"]{
+  --bg:#f5f7fa; --card:#ffffff; --card2:#f8fafc; --line:#e4e8ee; --line2:#eef1f5;
+  --txt:#1b232c; --dim:#63707f; --dim2:#8b97a6;
+  --acc:#1f6feb; --acc2:#1a5fd0; --ok:#1a7f37; --warn:#9a6700; --bad:#cf222e;
+  --btn:#f2f5f9; --btnline:#dde3ea; --hover:#e9eef5;
+  --shadow:0 1px 2px rgba(16,24,40,.06), 0 8px 24px -18px rgba(16,24,40,.3);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--txt);
+  font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2{margin:0;font-weight:600}
+h1{font-size:15px;letter-spacing:.2px}
+h2{font-size:13px;color:var(--txt)}
 .dim{color:var(--dim);font-size:12px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
-.card h2{font-size:13px;color:var(--dim);font-weight:600;letter-spacing:.05em;margin-bottom:10px}
-.row{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px dashed var(--dash);font-size:13px}
-.row:last-child{border:0}
-.row b{font-weight:500;color:var(--txt)}
-.k{color:var(--dim)}
-.bar{height:6px;background:var(--btn);border-radius:3px;overflow:hidden;margin:6px 0 2px}
-.bar>i{display:block;height:100%;background:var(--acc)}
-.bar.warn>i{background:var(--warn)}
-.bar.bad>i{background:var(--bad)}
-ul{list-style:none;max-height:230px;overflow:auto;font-size:12.5px}
-ul li{padding:3px 0;border-bottom:1px dashed var(--dash);color:#c9d1d9;word-break:break-all}
-ul li:last-child{border:0}
-.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-button{background:var(--btn);color:var(--txt);border:1px solid var(--btnline);border-radius:7px;padding:7px 12px;font-size:13px;cursor:pointer}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+.topbar{
+  position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.logo{
+  width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+  background:linear-gradient(145deg,var(--acc),var(--acc2));color:#fff;font-weight:700;font-size:12px;
+}
+.brand p{margin:2px 0 0;font-size:11.5px;color:var(--dim)}
+.tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0;max-width:100%}
+
+button,.select,.input{
+  font:inherit;color:var(--txt);background:var(--btn);border:1px solid var(--btnline);
+  border-radius:9px;padding:6px 11px;transition:.15s;
+}
+button{cursor:pointer}
 button:hover{background:var(--hover);border-color:var(--acc)}
-button.pri{background:#1f6feb;border-color:#1f6feb}
-button.pri:hover{background:#388bfd}
-#screen{width:100%;border-radius:8px;background:#000;display:block;min-height:180px}
-.tag{font-size:11px;color:var(--dim);margin-top:6px}
-.pill{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;background:var(--btn);color:var(--dim);margin-left:6px}
-.sw{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);cursor:pointer;user-select:none}
-.sw input{accent-color:#58a6ff;cursor:pointer}
-select.sel{background:var(--card);color:var(--txt);border:1px solid var(--btnline);border-radius:7px;padding:6px 9px;font-size:13px;max-width:190px}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50}
-.modal .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;width:min(520px,92vw)}
-.modal h3{font-size:15px;font-weight:500;margin-bottom:12px}
-.devit{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--dash);font-size:13px}
-.devit:last-of-type{border:0}
-.devit .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.devit .ad{color:var(--dim);font-size:12px}
-input.ipt{background:var(--bg);color:var(--txt);border:1px solid var(--btnline);border-radius:7px;padding:7px 9px;font-size:13px;width:100%}
-.addrow{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:12px}
-button.mini{padding:5px 10px;font-size:12px}
-button.danger{color:var(--bad);border-color:#6e2c2c}
-.appbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.applist{max-height:320px}
-.approw{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--dash);font-size:12.5px}
-.approw .pkg{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.approw .vf{color:var(--dim);font-size:11px;white-space:nowrap}
-.approw button{padding:3px 8px;font-size:11px}
-.approw button:disabled{opacity:.35;cursor:not-allowed}
-canvas#chart{width:100%;height:52px;display:block;margin-top:8px}
+button.primary{background:var(--acc2);border-color:var(--acc2);color:#fff}
+button.primary:hover{filter:brightness(1.08)}
+button.icon{padding:6px 9px;line-height:1}
+button:disabled{opacity:.4;cursor:not-allowed}
+button:disabled:hover{background:var(--btn);border-color:var(--btnline)}
+.input{background:var(--card2);min-width:0}
+.input:focus,.select:focus{outline:2px solid var(--acc);outline-offset:1px}
+.badge{font-size:11.5px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--dim)}
+.badge.on{color:var(--ok);border-color:var(--ok)}
+.badge.off{color:var(--bad);border-color:var(--bad)}
+.chip{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--btn);border:1px solid var(--btnline);color:var(--dim);white-space:nowrap}
+.chip.ok{color:var(--ok);border-color:var(--ok)}
+.chip.warn{color:var(--warn);border-color:var(--warn)}
+
+main{max-width:1400px;margin:0 auto;padding:18px 20px 48px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:7fr 5fr;gap:14px;align-items:start}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:14px 16px;min-width:0;max-width:100%;
+}
+.card-hd{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.card-hd h2{margin-right:auto}
+
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow)}
+.kpi-label{display:block;font-size:11.5px;color:var(--dim);margin-bottom:4px}
+.kpi strong{font-size:20px;font-weight:600;letter-spacing:-.2px}
+.kpi-sub{display:block;font-size:11.5px;color:var(--dim2);margin-top:3px}
+.bar{height:5px;border-radius:99px;background:var(--btn);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;width:0;background:var(--acc);transition:width .4s}
+.bar i.warn{background:var(--bad)}
+#spark{display:block;width:100%;height:64px}
+
+.screen{border-radius:10px;overflow:hidden;background:#05070a;border:1px solid var(--line2)}
+.screen img{display:block;width:100%;height:auto}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+.filter{display:flex;gap:8px;margin:-2px 0 10px}
+.filter .input{flex:1;min-width:0}
+.filter .select{flex:0 0 auto}
+.list{list-style:none;margin:0;padding:0;max-height:340px;overflow:auto}
+.list li{
+  display:flex;align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid var(--line2);
+  font-size:12.5px;min-width:0;
+}
+.list li:last-child{border-bottom:0}
+.list .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list .pkg{color:var(--dim2);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:40px}
+.list .val{color:var(--dim);font-size:11.5px;white-space:nowrap}
+.list.apps li{flex-wrap:wrap}
+.list.apps .name{flex:1 1 auto;max-width:40%;min-width:0}
+.list.apps .pkg{flex:1 1 120px}
+.row-acts{display:flex;gap:5px;flex:0 0 auto;margin-left:auto}
+.row-acts button{padding:3px 8px;font-size:11px;border-radius:7px}
+.row-acts button.danger{color:var(--bad)}
+.row-acts button.danger:hover{border-color:var(--bad)}
+
+.tabs{display:flex;gap:4px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.tab{background:transparent;border:0;padding:5px 10px;font-size:12px;color:var(--dim);border-radius:8px}
+.tab:hover{background:var(--hover);color:var(--txt);border:0}
+.tab.active{background:var(--btn);color:var(--txt);box-shadow:inset 0 0 0 1px var(--btnline)}
+.panel{display:none}
+.panel.active{display:block}
+
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;margin:0;font-size:12.5px}
+.kv dt{color:var(--dim);white-space:nowrap}
+.kv dd{margin:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kv + .kv{margin-top:12px;padding-top:12px;border-top:1px solid var(--line2)}
+
+.modal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(4,7,10,.62);padding:18px}
+.modal[hidden]{display:none}
+.sheet{
+  width:min(560px,100%);max-height:86vh;overflow:auto;background:var(--card);border:1px solid var(--line);
+  border-radius:16px;padding:18px 20px;box-shadow:0 30px 60px -20px rgba(0,0,0,.6);
+}
+.sheet h3{margin:0 0 12px;font-size:15px}
+.devit{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line2);font-size:13px}
+.devit:last-of-type{border-bottom:0}
+.devit .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.devit .ad{color:var(--dim);font-size:11.5px}
+.devit button{padding:4px 9px;font-size:11.5px}
+.devit button.danger{color:var(--bad)}
+.addrow{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin:14px 0 6px}
+.settings{border-top:1px solid var(--line);margin-top:16px;padding-top:14px;display:flex;flex-direction:column;gap:9px}
+.sw{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--txt);cursor:pointer}
+.sw input{accent-color:var(--acc);width:15px;height:15px;cursor:pointer}
+.sheet-ft{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);z-index:90;
+  background:var(--card);border:1px solid var(--line);color:var(--txt);
+  padding:9px 16px;border-radius:999px;font-size:12.5px;box-shadow:var(--shadow);
+  opacity:0;pointer-events:none;transition:.22s;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.banner{margin:14px 20px 0;padding:9px 14px;border-radius:10px;font-size:12.5px;
+  background:var(--card);border:1px solid var(--warn);color:var(--warn)}
+.banner[hidden]{display:none}
+.banner a{color:inherit}
+
+@media (max-width:1180px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .grid{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  body{overflow-x:hidden}
+  main{padding:14px 12px 40px}
+  .list.apps .name{max-width:100%;flex:1 1 100%}
+  .list.apps .pkg{flex:1 1 100%;order:3}
+  .topbar{padding:10px 12px}
+  .kpis{grid-template-columns:1fr 1fr;gap:9px}
+  .kpi strong{font-size:17px}
+  .list.apps .name{max-width:100%}
+  .addrow{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-<header>
-  <h1>📺 电视管理后台</h1>
-  <span id="dev" class="badge">连接中…</span>
-  <span id="ver" class="pill">v—</span>
-  <span id="adp" class="pill" title="机型适配器：把包名翻译成中文名">适配器 —</span>
-  <select id="devsel" class="sel" onchange="switchDevice(this.value)" title="切换设备"></select>
-  <button class="mini" onclick="openManage()">设备</button>
-  <span id="ts" class="dim"></span>
-  <span style="flex:1"></span>
-  <label class="sw" title="默认隐藏 IP、序列号、Wi-Fi 名称；设置保存在 local/settings.json">
-    <input type="checkbox" id="mask" checked onchange="toggleMask(this.checked)"> 隐藏敏感信息
-  </label>
-  <a id="upd" class="pill" style="display:none;color:#d29922;cursor:pointer" target="_blank" rel="noopener">有新版本</a>
-  <button class="mini" onclick="toggleTheme()" title="切换浅色/深色">◐</button>
-  <button onclick="refresh()">立即刷新</button>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">TV</div>
+    <div>
+      <h1>电视管理后台</h1>
+      <p><span id="devName">未连接</span> · <span id="ver">v—</span></p>
+    </div>
+  </div>
+  <div class="tools">
+    <span id="online" class="badge off">离线</span>
+    <span id="adp" class="chip">适配器 —</span>
+    <select id="devsel" class="select" title="切换设备"></select>
+    <button id="btnManage" class="icon" title="设备与设置">⚙</button>
+    <button id="btnTheme" class="icon" title="切换浅色 / 深色">◐</button>
+    <button id="btnRefresh" class="primary">刷新</button>
+  </div>
 </header>
-<div class="grid">
-  <div class="card" style="grid-column:span 2;min-width:320px">
-    <h2>实时画面 <span class="pill" id="fps">—</span></h2>
-    <img id="screen" src="/api/screen" alt="电视画面">
-    <div class="tag">约 1 帧/秒（受电视截屏速度限制），仅支持单路查看</div>
-    <div class="btns">
-      <button class="pri" onclick="act('castbay')">打开映湾</button>
-      <button onclick="act('home')">回桌面</button>
-      <button onclick="act('back')">返回键</button>
-      <button onclick="act('whitelist')">加白名单</button>
-      <button onclick="act('screenshot')">保存截图</button>
-    </div>
-  </div>
 
-  <div class="card" style="grid-column:span 2;min-width:320px">
-    <h2>应用管理 <span class="pill" id="appN">—</span></h2>
-    <div class="appbar">
-      <input class="ipt" id="appq" placeholder="搜索包名，如 castbay" oninput="loadApps()" style="flex:1;min-width:160px">
-      <select class="sel" id="appscope" onchange="loadApps()">
-        <option value="third">第三方应用</option>
-        <option value="all">全部应用</option>
-      </select>
-      <button class="mini" onclick="loadApps()">刷新</button>
-    </div>
-    <ul id="applist" class="applist"></ul>
-    <div class="tag">卸载/停用走 <code>pm</code>，系统关键组件已加入保护名单；操作不可撤销，请谨慎。</div>
-  </div>
+<div id="updBanner" class="banner" hidden></div>
 
-  <div class="card"><h2>硬件信息</h2><div id="hw"></div></div>
-  <div class="card"><h2>内存 &amp; 运行时长</h2><div id="mem"></div><canvas id="chart"></canvas><div class="tag">最近 3 分钟内存占用趋势</div></div>
-  <div class="card"><h2>存储</h2><div id="sto"></div></div>
-  <div class="card"><h2>网络</h2><div id="net"></div></div>
-  <div class="card"><h2>前台应用</h2><div id="fg"></div></div>
-  <div class="card"><h2>CastBay 状态</h2><div id="cb"></div></div>
-  <div class="card"><h2>进程 Top（按内存）</h2><ul id="proc"></ul></div>
-  <div class="card"><h2>后台服务 <span class="pill" id="svcN"></span></h2><ul id="svc"></ul></div>
-  <div class="card"><h2>自启动应用（BOOT_COMPLETED）<span class="pill" id="bootN"></span></h2><ul id="boot"></ul></div>
-  <div class="card"><h2>省电白名单</h2><ul id="wl"></ul></div>
-</div>
-<div id="modal" class="modal" style="display:none">
-  <div class="box">
-    <h3>设备管理</h3>
-    <div id="devlist"></div>
+<main>
+  <section class="kpis">
+    <div class="kpi">
+      <span class="kpi-label">内存占用</span>
+      <strong id="kpiMem">—</strong>
+      <div class="bar"><i id="kpiMemBar"></i></div>
+      <span class="kpi-sub" id="kpiMemSub">—</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-label">存储</span>
+      <strong id="kpiStore">—</strong>
+      <div class="bar"><i id="kpiStoreBar"></i></div>
+      <span class="kpi-sub" id="kpiStoreSub">—</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-label">运行时长</span>
+      <strong id="kpiUp">—</strong>
+      <span class="kpi-sub">自上次开机</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-label">投屏接收端</span>
+      <strong id="kpiCast">—</strong>
+      <span class="kpi-sub" id="kpiCastSub">—</span>
+    </div>
+  </section>
+
+  <div class="grid">
+    <section class="col">
+      <article class="card">
+        <header class="card-hd">
+          <h2>实时画面</h2>
+          <span class="dim" id="screenHint">约 1 帧/秒</span>
+        </header>
+        <div class="screen"><img id="screen" alt="电视实时画面"></div>
+        <div class="actions">
+          <button data-act="castbay">打开映湾</button>
+          <button data-act="home">回桌面</button>
+          <button data-act="back">返回键</button>
+          <button data-act="whitelist">加省电白名单</button>
+          <button data-act="screenshot">保存截图</button>
+        </div>
+      </article>
+
+      <article class="card">
+        <header class="card-hd">
+          <h2>应用管理 <span id="appCount" class="chip">—</span></h2>
+        </header>
+        <div class="filter">
+          <input id="appQuery" class="input" placeholder="搜索包名 / 名称">
+          <select id="appScope" class="select">
+            <option value="third">第三方</option>
+            <option value="all">全部</option>
+          </select>
+        </div>
+        <ul id="appList" class="list apps"></ul>
+      </article>
+      <article class="card">
+        <header class="card-hd"><h2>内存趋势</h2><span class="dim">最近 3 分钟</span></header>
+        <canvas id="spark"></canvas>
+      </article>
+    </section>
+
+    <aside class="col">
+      <article class="card">
+        <header class="card-hd"><h2>设备与网络</h2></header>
+        <dl class="kv" id="deviceInfo"></dl>
+        <dl class="kv" id="netInfo"></dl>
+        <dl class="kv" id="fgInfo"></dl>
+      </article>
+
+      <article class="card">
+        <header class="card-hd">
+          <div class="tabs">
+            <button class="tab active" data-tab="proc">进程 <span id="procN" class="dim"></span></button>
+            <button class="tab" data-tab="svc">服务 <span id="svcN" class="dim"></span></button>
+            <button class="tab" data-tab="boot">自启动 <span id="bootN" class="dim"></span></button>
+          </div>
+        </header>
+        <ul id="proc" class="list panel active"></ul>
+        <ul id="svc" class="list panel"></ul>
+        <ul id="boot" class="list panel"></ul>
+      </article>
+
+      <article class="card">
+        <header class="card-hd"><h2>省电白名单</h2><span id="wlN" class="dim"></span></header>
+        <ul id="wl" class="list"></ul>
+      </article>
+
+    </aside>
+  </div>
+</main>
+
+<div id="modal" class="modal" hidden>
+  <div class="sheet">
+    <h3>设备与设置</h3>
+    <div id="devList"></div>
     <div class="addrow">
-      <input class="ipt" id="dname" placeholder="名称，如 客厅 TCL">
-      <input class="ipt" id="daddr" placeholder="192.168.1.10:5555">
-      <button class="pri" onclick="addDevice()">添加</button>
+      <input class="input" id="devNameInput" placeholder="名称，如 客厅 TCL">
+      <input class="input" id="devAddrInput" placeholder="192.168.1.10:5555">
+      <button class="primary" id="btnAddDev">添加</button>
     </div>
-    <div class="tag">保存在 local/devices.json；切换会同步写入 local/config.json</div>
-    <label class="sw" style="margin-top:12px">
-      <input type="checkbox" id="updchk" onchange="toggleUpdate(this.checked)"> 启动时检查 GitHub 新版本
-    </label>
-    <label class="sw" style="margin-top:8px" title="电视重启后 CastBay 不会自启，勾选后由本机服务在电视在线时自动拉起">
-      <input type="checkbox" id="recvchk" onchange="toggleReceiver(this.checked)"> 电视在线时自动打开映湾
-    </label>
-    <label class="sw" style="margin-top:8px" title="拉起后立刻退回原画面，不在电视上停留在映湾界面；正在播放视频时不打扰">
-      <input type="checkbox" id="silentchk" onchange="toggleSilent(this.checked)"> 静默拉起（不留在映湾界面）
-    </label>
-    <label class="sw" style="margin-top:8px" title="检测到真的在投屏时把映湾切到前台；退到后台会丢掉画面，只剩声音">
-      <input type="checkbox" id="castchk" onchange="toggleCastFg(this.checked)"> 投屏时自动切到映湾前台（保证有画面）
-    </label>
-    <div class="btns" style="justify-content:flex-end"><button onclick="closeManage()">关闭</button></div>
+    <p class="dim" style="margin:6px 0 0">保存在 <span class="mono">local/devices.json</span>，切换会同步写入 <span class="mono">local/config.json</span>。</p>
+
+    <div class="settings">
+      <label class="sw"><input type="checkbox" id="setMask"> 隐藏敏感信息（IP / 序列号 / Wi-Fi 名）</label>
+      <label class="sw"><input type="checkbox" id="setUpd"> 启动时检查 GitHub 新版本</label>
+      <label class="sw"><input type="checkbox" id="setRecv"> 电视在线时自动打开映湾</label>
+      <label class="sw"><input type="checkbox" id="setSilent"> 静默拉起（不在电视上停留在映湾界面）</label>
+      <label class="sw"><input type="checkbox" id="setCastFg"> 投屏时自动切到映湾前台（保证有画面）</label>
+    </div>
+
+    <div class="sheet-ft"><button id="btnCloseModal">关闭</button></div>
   </div>
 </div>
+
+<div id="toast" class="toast"></div>
+
 <script>
-const $ = id => document.getElementById(id);
+"use strict";
+
 const TK = new URLSearchParams(location.search).get('token') || '';
 const TKQ = TK ? ('?token=' + encodeURIComponent(TK)) : '';
-const AUTH = TK ? {'X-Auth-Token': TK} : {};
+const AUTH = TK ? { 'X-Auth-Token': TK } : {};
+const $ = id => document.getElementById(id);
 
-let ADAPTER = {};          // 包名 -> {name, role, policy, note}
+let ADAPTER = {};
+let timer = null;
+let lastHistory = [];
 
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => (
+    { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
+  ));
+}
+
+function toast(msg){
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+async function api(path, opts){
+  const res = await fetch(path + TKQ, Object.assign({ headers: AUTH }, opts || {}));
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return await res.json();
+}
+
+async function post(path, body){
+  return await api(path, {
+    method: 'POST',
+    headers: Object.assign({ 'Content-Type': 'application/json' }, AUTH),
+    body: JSON.stringify(body)
+  });
+}
+
+/* 主题 */
+function applyTheme(t){
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem('tvtheme', t); } catch (e) {}
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', t === 'light' ? '#f5f7fa' : '#0b0f14');
+}
+$('btnTheme').onclick = () => {
+  applyTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
+  renderSpark(lastHistory);
+};
+(function initTheme(){
+  let saved = null;
+  try { saved = localStorage.getItem('tvtheme'); } catch (e) {}
+  applyTheme(saved || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'));
+})();
+
+/* 适配器 */
 function label(pkg){
   const a = ADAPTER[pkg];
   return (a && a.name) ? a.name : pkg;
 }
-
-function policyTag(pkg){
+function tagOf(pkg){
   const a = ADAPTER[pkg];
-  if(!a || !a.policy) return '';
-  const text = {avoid:'禁止', keep:'', optional:'可停', bloat:'建议停'}[a.policy] || '';
-  if(!text) return '';
-  const cls = a.policy === 'avoid' ? 'bad' : (a.policy === 'bloat' ? 'warn' : '');
-  return ` <span class="pill" ${cls ? `style="color:var(--${cls})"` : ''} title="${esc(a.note || '')}">${text}</span>`;
+  if (!a || !a.policy) return '';
+  const map = { avoid:['禁止','bad'], keep:['',''], optional:['可停',''], bloat:['建议停','warn'] };
+  const hit = map[a.policy];
+  if (!hit || !hit[0]) return '';
+  return `<span class="chip ${hit[1]}" title="${esc(a.note || '')}">${hit[0]}</span>`;
 }
-
 async function loadAdapter(){
-  try{
-    const d = await (await fetch('/api/adapter' + TKQ, {headers: AUTH})).json();
+  try {
+    const d = await api('/api/adapter');
     ADAPTER = d.packages || {};
     const el = $('adp');
-    if(d.matched){
+    if (d.matched){
       el.textContent = '适配器 ' + d.matched;
+      el.className = 'chip ok';
       el.title = (d.name || '') + (d.reference_device ? '\n参考机型：' + d.reference_device : '');
-      el.style.color = 'var(--ok)';
-    }else{
+    } else {
       el.textContent = '适配器 未适配';
+      el.className = 'chip warn';
       el.title = '当前机型没有适配器，显示原始包名。可参考 adapters/_template.json 新增。';
-      el.style.color = 'var(--warn)';
     }
-  }catch(e){}
+  } catch (e) {}
 }
 
-function applyTheme(t){
-  document.documentElement.dataset.theme = t;
-  try{ localStorage.setItem('tvtheme', t); }catch(e){}
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if(meta) meta.setAttribute('content', t === 'light' ? '#f4f6f8' : '#0d1117');
+/* 状态渲染 */
+function kvRows(pairs){
+  return pairs.map(p => `<dt>${esc(p[0])}</dt><dd title="${esc(p[1] || '')}">${esc(p[1] || '—')}</dd>`).join('');
 }
-
-function toggleTheme(){
-  applyTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
-  loadHistory();
+function fmtTs(ts){
+  if (!ts) return '—';
+  try { return new Date(ts * 1000).toLocaleTimeString('zh-CN', { hour12: false }); } catch (e) { return '—'; }
 }
-
-(function initTheme(){
-  let saved = null;
-  try{ saved = localStorage.getItem('tvtheme'); }catch(e){}
-  applyTheme(saved || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'));
-})();
-const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const row = (k, v) => `<div class="row"><span class="k">${esc(k)}</span><b>${esc(v)}</b></div>`;
-const bar = pct => `<div class="bar ${pct>85?'bad':pct>65?'warn':''}"><i style="width:${Math.min(pct,100)}%"></i></div>`;
 
 async function refresh(){
-  try{
-    const r = await fetch('/api/status' + TKQ);
-    const d = await r.json();
-    $('dev').className = 'badge ' + (d.online ? 'on' : 'off');
-    $('dev').textContent = d.online ? (d.props?.['ro.product.model'] || d.device) + ' · 在线' : '离线';
+  try {
+    const d = await api('/api/status');
+    const online = !!d.online;
+    $('online').className = 'badge ' + (online ? 'on' : 'off');
+    $('online').textContent = online ? '在线' : '离线';
+    $('devName').textContent = d.device || '—';
     if (d.version) $('ver').textContent = 'v' + d.version;
-    $('ts').textContent = '更新于 ' + d.ts;
-    if(!d.online) return;
-    const p = d.props || {};
-    $('hw').innerHTML = row('型号', p['ro.product.model']) + row('品牌', p['ro.product.brand'])
-      + row('Android', p['ro.build.version.release'] + ' (API ' + p['ro.build.version.sdk'] + ')')
-      + row('CPU 架构', p['ro.product.cpu.abilist']) + row('主板', p['ro.product.board'])
-      + row('序列号', p['ro.serialno']) + row('分辨率', d.screen?.size)
-      + row('构建', p['ro.build.display.id']);
-    const m = d.mem || {};
-    $('mem').innerHTML = row('总内存', m.total_mb + ' MB') + row('已用', m.used_mb + ' MB')
-      + row('可用', m.avail_mb + ' MB') + bar(m.pct) + row('占用率', m.pct + '%')
-      + row('开机时长', d.uptime || '—');
-    $('sto').innerHTML = (d.storage||[]).map(s => row(s.mount, `${s.used_gb} / ${s.total_gb} GB (${s.pct}%)`) + bar(s.pct)).join('');
-    const n = d.net || {};
-    $('net').innerHTML = row('IP', n.ip || '—') + row('Wi-Fi', n.wifi?.ssid || '—')
-      + row('信号', n.wifi?.rssi || '—') + row('速率', n.wifi?.speed || '—');
-    const f = d.foreground || {};
-    $('fg').innerHTML = row('包名', f.package || '—') + row('Activity', f.activity || '—');
-    const c = d.castbay || {};
-    $('cb').innerHTML = row('已安装', c.installed ? '是' : '否') + row('运行中', c.running ? '是 (PID ' + c.pid + ')' : '否')
-      + row('接收端口', c.port || '未监听') + row('白名单', (d.whitelist||[]).includes('com.weenas.castbay') ? '已在' : '不在');
-    $('proc').innerHTML = (d.processes||[]).map(x => `<li title="${esc(x.name)}">${esc(label(x.name))} <span class="dim" style="font-size:11px">${esc(x.name)}</span> <span class="pill">${x.rss_mb}MB</span></li>`).join('');
-    $('svc').innerHTML = (d.services||[]).map(s => `<li title="${esc(s.pkg)}${esc(s.svc)}">${esc(label(s.pkg))}${policyTag(s.pkg)} <span class="dim" style="font-size:11px">${esc(s.svc)}</span></li>`).join('');
-    $('svcN').textContent = (d.services||[]).length + ' 项';
-    $('boot').innerHTML = (d.boot||[]).map(x => `<li title="${esc(x)}">${esc(label(x))}${policyTag(x)} <span class="dim" style="font-size:11px">${esc(x)}</span></li>`).join('');
-    $('bootN').textContent = (d.boot||[]).length + ' 个应用';
-    $('wl').innerHTML = (d.whitelist||[]).map(x => `<li>${esc(x)}</li>`).join('') || '<li class="dim">空</li>';
-  }catch(e){
-    $('dev').className = 'badge off';
-    $('dev').textContent = '后台未连接';
-  }
-}
+    if (d.adapter) $('adp').textContent = '适配器 ' + d.adapter;
 
-async function act(cmd){
-  const r = await fetch('/api/action' + TKQ, {method:'POST', headers: Object.assign({'Content-Type':'application/json'}, AUTH), body: JSON.stringify({cmd})});
-  const d = await r.json();
-  alert(d.msg + (d.path ? '\n' + d.path : ''));
-  refresh();
-}
-
-let timer = null;
-function startTimer(ms){
-  if (timer) clearInterval(timer);
-  timer = setInterval(refresh, ms || 5000);
-}
-
-async function loadSettings(){
-  try{
-    const s = await (await fetch('/api/settings' + TKQ)).json();
-    $('mask').checked = !!s.mask_sensitive;
-    $('updchk').checked = !!s.check_updates;
-    $('recvchk').checked = !!s.auto_launch_receiver;
-    $('silentchk').checked = !!s.silent_launch;
-    $('castchk').checked = !!s.foreground_on_cast;
-    startTimer((s.refresh_seconds || 5) * 1000);
-  }catch(e){
-    startTimer(5000);
-  }
-}
-
-async function toggleMask(on){
-  try{
-    await fetch('/api/settings' + TKQ, {
-      method: 'POST',
-      headers: Object.assign({'Content-Type': 'application/json'}, AUTH),
-      body: JSON.stringify({mask_sensitive: on})
-    });
-  }catch(e){}
-  refresh();
-}
-
-async function checkUpdate(){
-  try{
-    const d = await (await fetch('/api/update' + TKQ, {headers: AUTH})).json();
-    const a = $('upd');
-    if(d.has_update){
-      a.textContent = '可更新 v' + d.latest;
-      a.href = d.url || '#';
-      a.style.display = 'inline-block';
-      a.title = '当前 v' + d.current;
-    }else{
-      a.style.display = 'none';
+    if (!online){
+      ['kpiMem','kpiStore','kpiUp','kpiCast'].forEach(id => { $(id).textContent = '—'; });
+      $('kpiMemSub').textContent = '电视未连接';
+      $('kpiCastSub').textContent = '';
+      $('deviceInfo').innerHTML = kvRows([['状态', '电视未连接或已休眠']]);
+      $('netInfo').innerHTML = '';
+      $('fgInfo').innerHTML = '';
+      ['proc','svc','boot','wl'].forEach(id => { $(id).innerHTML = ''; });
+      $('appList').innerHTML = '';
+      $('screen').removeAttribute('src');
+      return;
     }
-  }catch(e){}
-}
 
-async function toggleUpdate(on){
-  try{
-    await fetch('/api/settings' + TKQ, {
-      method: 'POST',
-      headers: Object.assign({'Content-Type': 'application/json'}, AUTH),
-      body: JSON.stringify({check_updates: on})
-    });
-  }catch(e){}
-  checkUpdate();
-}
+    const p = d.props || {};
+    const m = d.mem || {};
+    const st = (d.storage || [])[0] || {};
 
-async function toggleReceiver(on){
-  try{
-    await fetch('/api/settings' + TKQ, {
-      method: 'POST',
-      headers: Object.assign({'Content-Type': 'application/json'}, AUTH),
-      body: JSON.stringify({auto_launch_receiver: on})
-    });
-  }catch(e){}
-}
+    $('kpiMem').textContent = (m.pct != null ? m.pct + '%' : '—');
+    $('kpiMemSub').textContent = (m.used_mb || 0) + ' / ' + (m.total_mb || 0) + ' MB';
+    const mb = $('kpiMemBar');
+    mb.style.width = Math.min(100, m.pct || 0) + '%';
+    mb.className = (m.pct || 0) >= 85 ? 'warn' : '';
 
-async function toggleSilent(on){
-  try{
-    await fetch('/api/settings' + TKQ, {
-      method: 'POST',
-      headers: Object.assign({'Content-Type': 'application/json'}, AUTH),
-      body: JSON.stringify({silent_launch: on})
-    });
-  }catch(e){}
-}
+    $('kpiStore').textContent = (st.pct != null ? st.pct + '%' : '—');
+    $('kpiStoreSub').textContent = (st.used_gb || 0) + ' / ' + (st.total_gb || 0) + ' GB';
+    $('kpiStoreBar').style.width = Math.min(100, st.pct || 0) + '%';
 
-async function toggleCastFg(on){
-  try{
-    await fetch('/api/settings' + TKQ, {
-      method: 'POST',
-      headers: Object.assign({'Content-Type': 'application/json'}, AUTH),
-      body: JSON.stringify({foreground_on_cast: on})
-    });
-  }catch(e){}
-}
+    $('kpiUp').textContent = d.uptime || '—';
 
-async function loadApps(){
-  const q = ($('appq').value || '').trim();
-  const scope = $('appscope').value || 'third';
-  try{
-    const params = new URLSearchParams({scope, q});
-    if(TK) params.set('token', TK);
-    const d = await (await fetch('/api/apps?' + params.toString(), {headers: AUTH})).json();
-    const items = d.items || [];
-    $('appN').textContent = items.length + ' 个';
-    $('applist').innerHTML = items.map(a => `
-      <li class="approw">
-        <span class="pkg" title="${esc(a.pkg)}">${esc(label(a.pkg))}${a.system ? ' <span class="pill">系统</span>' : ''} <span class="dim" style="font-size:11px">${esc(a.pkg)}</span></span>
-        <span class="vf">${a.versionCode ? 'v' + a.versionCode : ''}</span>
-        <button onclick="appAct('${a.pkg}','open')">打开</button>
-        <button onclick="appAct('${a.pkg}','stop')">停止</button>
-        <button onclick="appAct('${a.pkg}','disable')" ${a.blocked?'disabled':''}>停用</button>
-        <button class="danger" onclick="appAct('${a.pkg}','uninstall')" ${a.blocked?'disabled':''}>卸载</button>
-      </li>`).join('') || '<li class="dim">无匹配应用</li>';
-  }catch(e){
-    $('applist').innerHTML = '<li class="dim">读取失败（设备可能离线）</li>';
+    const c = d.castbay || {};
+    $('kpiCast').textContent = c.running ? '运行中' : (c.installed ? '已停止' : '未安装');
+    $('kpiCastSub').textContent = c.running
+      ? ('端口 ' + (c.port || '—') + ' · PID ' + (c.pid || '—'))
+      : '在电视上打开映湾即可投屏';
+
+    $('deviceInfo').innerHTML = kvRows([
+      ['型号', p['ro.product.model']],
+      ['品牌', p['ro.product.brand']],
+      ['Android', (p['ro.build.version.release'] || '') + (p['ro.build.version.sdk'] ? ' (API ' + p['ro.build.version.sdk'] + ')' : '')],
+      ['CPU', p['ro.product.cpu.abilist']],
+      ['主板', p['ro.product.board']],
+      ['分辨率', d.screen && d.screen.size],
+      ['序列号', p['ro.serialno']],
+      ['构建', p['ro.build.display.id']]
+    ]);
+
+    const n = d.net || {};
+    const wifi = n.wifi || {};
+    $('netInfo').innerHTML = kvRows([
+      ['IP', n.ip],
+      ['Wi-Fi', wifi.ssid],
+      ['信号', wifi.rssi],
+      ['速率', wifi.speed]
+    ]);
+
+    const f = d.foreground || {};
+    $('fgInfo').innerHTML = kvRows([
+      ['前台应用', f.package ? label(f.package) : ''],
+      ['Activity', f.activity],
+      ['更新于', fmtTs(d.ts)]
+    ]);
+
+    const procs = d.processes || [];
+    $('proc').innerHTML = procs.map(x => `
+      <li title="${esc(x.name)}">
+        <span class="name">${esc(label(x.name))}</span>
+        <span class="pkg mono">${esc(x.name)}</span>
+        <span class="val">${x.rss_mb == null ? '' : esc(x.rss_mb) + ' MB'}</span>
+      </li>`).join('');
+    $('procN').textContent = procs.length;
+
+    const svcs = d.services || [];
+    $('svc').innerHTML = svcs.map(s => `
+      <li title="${esc(s.svc || '')}">
+        <span class="name">${esc(label(s.pkg))}</span>
+        ${tagOf(s.pkg)}
+        <span class="pkg mono">${esc(s.svc || '')}</span>
+      </li>`).join('');
+    $('svcN').textContent = svcs.length;
+
+    const boot = d.boot || [];
+    $('boot').innerHTML = boot.map(x => `
+      <li title="${esc(x)}">
+        <span class="name">${esc(label(x))}</span>
+        ${tagOf(x)}
+        <span class="pkg mono">${esc(x)}</span>
+      </li>`).join('');
+    $('bootN').textContent = boot.length;
+
+    const wl = d.whitelist || [];
+    $('wl').innerHTML = wl.map(x => `<li><span class="name">${esc(label(x))}</span><span class="pkg mono">${esc(x)}</span></li>`).join('');
+    $('wlN').textContent = wl.length + ' 项';
+
+    const img = $('screen');
+    if (!img.getAttribute('src')) img.src = '/api/screen' + TKQ;
+
+    loadApps();
+  } catch (e) {
+    $('online').className = 'badge off';
+    $('online').textContent = '连接失败';
   }
 }
 
-async function appAct(pkg, cmd){
-  if(cmd === 'uninstall' && !confirm(`确定卸载 ${pkg}？`)) return;
-  if(cmd === 'disable' && !confirm(`确定停用 ${pkg}？停用后它会从桌面消失。`)) return;
-  const r = await fetch('/api/app' + TKQ, {
-    method: 'POST',
-    headers: Object.assign({'Content-Type': 'application/json'}, AUTH),
-    body: JSON.stringify({cmd, pkg})
-  });
-  const d = await r.json();
-  if(!d.ok) alert(d.msg || '操作失败');
-  loadApps();
-  refresh();
-}
-
-async function loadHistory(){
-  try{
-    const d = await (await fetch('/api/history' + TKQ, {headers: AUTH})).json();
-    drawChart(d.items || []);
-  }catch(e){}
-}
-
-function drawChart(items){
-  const cv = $('chart');
-  if(!cv || !cv.getContext) return;
+/* 内存趋势 */
+function renderSpark(items){
+  const cv = $('spark');
+  if (!cv) return;
   const dpr = window.devicePixelRatio || 1;
-  const w = cv.clientWidth || 300, h = 52;
+  const w = cv.clientWidth || 320, h = 64;
   cv.width = Math.round(w * dpr);
   cv.height = Math.round(h * dpr);
   const ctx = cv.getContext('2d');
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, w, h);
+  if (!items || items.length < 2) return;
 
   const style = getComputedStyle(document.documentElement);
-  const line = style.getPropertyValue('--chart').trim() || '#58a6ff';
-  const grid = style.getPropertyValue('--dash').trim() || '#1d2229';
+  const line = style.getPropertyValue('--acc').trim() || '#58a6ff';
+  const grid = style.getPropertyValue('--line').trim() || '#1e2732';
+  const vals = items.map(i => Number(i.mem) || 0);
+  const lo = Math.min.apply(null, vals);
+  const hi = Math.max.apply(null, vals);
+  const span = Math.max(3, hi - lo);          // 至少 3 个百分点，避免平线
+  const x = i => (i / (items.length - 1)) * (w - 2) + 1;
+  const y = v => h - 6 - ((v - lo) / span) * (h - 18);
 
   ctx.strokeStyle = grid;
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(0, h - 1.5);
-  ctx.lineTo(w, h - 1.5);
+  ctx.moveTo(0, h - 2);
+  ctx.lineTo(w, h - 2);
   ctx.stroke();
 
-  if(items.length < 2) return;
-  const vals = items.map(i => Number(i.mem) || 0);
-  const x = i => (i / (items.length - 1)) * (w - 4) + 2;
-  const y = v => h - 5 - (Math.min(v, 100) / 100) * (h - 12);
-
   ctx.strokeStyle = line;
-  ctx.lineWidth = 1.6;
+  ctx.lineWidth = 1.8;
   ctx.beginPath();
   vals.forEach((v, i) => (i ? ctx.lineTo(x(i), y(v)) : ctx.moveTo(x(i), y(v))));
   ctx.stroke();
 
   ctx.fillStyle = line;
   ctx.font = '11px sans-serif';
-  ctx.fillText(vals[vals.length - 1] + '%', w - 34, 12);
+  ctx.fillText(vals[vals.length - 1] + '%', Math.max(2, w - 30), 12);
+  ctx.fillStyle = grid;
+  ctx.fillText(lo + '–' + hi + '%', 2, 12);
 }
 
-async function apiDevices(payload){
-  const opt = payload ? {method:'POST', headers: Object.assign({'Content-Type':'application/json'}, AUTH), body: JSON.stringify(payload)} : {};
-  const r = await fetch('/api/devices' + TKQ, opt);
-  return await r.json();
+async function loadHistory(){
+  try {
+    const d = await api('/api/history');
+    lastHistory = d.items || [];
+    renderSpark(lastHistory);
+  } catch (e) {}
 }
 
+/* 应用管理 */
+function appRow(a){
+  return `<li>
+    <span class="name" title="${esc(a.pkg)}">${esc(label(a.pkg))}</span>
+    <span class="pkg mono">${esc(a.pkg)}</span>
+    <span class="val">${a.versionCode ? 'v' + esc(a.versionCode) : ''}</span>
+    <span class="row-acts">
+      <button data-app="open" data-pkg="${esc(a.pkg)}">打开</button>
+      <button data-app="stop" data-pkg="${esc(a.pkg)}">停止</button>
+      <button data-app="disable" data-pkg="${esc(a.pkg)}" ${a.blocked ? 'disabled' : ''}>停用</button>
+      <button class="danger" data-app="uninstall" data-pkg="${esc(a.pkg)}" ${a.blocked ? 'disabled' : ''}>卸载</button>
+    </span>
+  </li>`;
+}
+
+async function loadApps(){
+  const q = ($('appQuery').value || '').trim();
+  const scope = $('appScope').value || 'third';
+  try {
+    const params = new URLSearchParams({ scope, q });
+    if (TK) params.set('token', TK);
+    const d = await api('/api/apps?' + params.toString());
+    const items = d.items || [];
+    $('appCount').textContent = items.length + ' 个';
+    $('appList').innerHTML = items.length ? items.map(appRow).join('') : '<li class="dim" style="padding:12px 2px">没有匹配的应用</li>';
+  } catch (e) {
+    $('appList').innerHTML = '<li class="dim" style="padding:12px 2px">读取失败（电视可能离线）</li>';
+  }
+}
+
+$('appQuery').addEventListener('input', () => {
+  clearTimeout(loadApps._t);
+  loadApps._t = setTimeout(loadApps, 250);
+});
+$('appScope').addEventListener('change', loadApps);
+
+$('appList').addEventListener('click', async (ev) => {
+  const btn = ev.target.closest('button[data-app]');
+  if (!btn) return;
+  const cmd = btn.dataset.app, pkg = btn.dataset.pkg;
+  if (cmd === 'uninstall' && !confirm('确定卸载 ' + pkg + '？此操作不可撤销。')) return;
+  if (cmd === 'disable' && !confirm('确定停用 ' + pkg + '？停用后它会从桌面消失。')) return;
+  btn.disabled = true;
+  try {
+    const r = await post('/api/app', { cmd, pkg });
+    toast(r.msg || (r.ok ? '已执行' : '执行失败'));
+    loadApps();
+    refresh();
+  } catch (e) {
+    toast('执行失败');
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+/* 快捷操作 */
+document.querySelector('.actions').addEventListener('click', async (ev) => {
+  const btn = ev.target.closest('button[data-act]');
+  if (!btn) return;
+  const cmd = btn.dataset.act;
+  btn.disabled = true;
+  try {
+    const r = await post('/api/action', { cmd });
+    toast(r.msg || '已执行');
+    if (cmd === 'castbay' || cmd === 'home') setTimeout(refresh, 1200);
+  } catch (e) {
+    toast('操作失败');
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+/* 标签页 */
+document.querySelector('.tabs').addEventListener('click', (ev) => {
+  const tab = ev.target.closest('.tab');
+  if (!tab) return;
+  const name = tab.dataset.tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+  ['proc','svc','boot'].forEach(id => $(id).classList.toggle('active', id === name));
+});
+
+/* 设备 */
 async function loadDevices(){
-  try{
-    const d = await apiDevices();
-    const sel = $('devsel');
-    sel.innerHTML = (d.items||[]).map(i =>
-      `<option value="${i.id}" ${i.id===d.active?'selected':''}>${esc(i.name)}</option>`).join('');
-    $('devlist').innerHTML = (d.items||[]).map(i => `
+  try {
+    const d = await api('/api/devices');
+    const items = d.items || [];
+    $('devsel').innerHTML = items.map(i =>
+      `<option value="${esc(i.id)}" ${i.id === d.active ? 'selected' : ''}>${esc(i.name)}</option>`).join('');
+    $('devList').innerHTML = items.map(i => `
       <div class="devit">
         <span class="nm">${esc(i.name)}<span class="ad"> · ${esc(i.device)}</span></span>
-        <button class="mini" onclick="switchDevice('${i.id}')">${i.id===d.active?'当前':'切换'}</button>
-        <button class="mini danger" onclick="removeDevice('${i.id}')">删除</button>
+        <button data-dev-sel="${esc(i.id)}" ${i.id === d.active ? 'disabled' : ''}>${i.id === d.active ? '当前' : '切换'}</button>
+        <button class="danger" data-dev-del="${esc(i.id)}">删除</button>
       </div>`).join('');
-  }catch(e){}
+  } catch (e) {}
 }
 
-async function switchDevice(id){
-  if(!id) return;
-  const r = await apiDevices({action:'select', id});
-  if(r && r.ok){ await loadAdapter(); await loadDevices(); refresh(); }
+$('devsel').addEventListener('change', async (ev) => {
+  try {
+    await post('/api/devices', { action: 'select', id: ev.target.value });
+    await loadAdapter();
+    await loadDevices();
+    refresh();
+    toast('已切换设备');
+  } catch (e) { toast('切换失败'); }
+});
+
+$('devList').addEventListener('click', async (ev) => {
+  const sel = ev.target.closest('button[data-dev-sel]');
+  const del = ev.target.closest('button[data-dev-del]');
+  if (sel){
+    await post('/api/devices', { action: 'select', id: sel.dataset.devSel });
+    await loadDevices(); await loadAdapter(); refresh();
+    return;
+  }
+  if (del){
+    if (!confirm('删除该设备？')) return;
+    await post('/api/devices', { action: 'remove', id: del.dataset.devDel });
+    await loadDevices(); refresh();
+  }
+});
+
+$('btnAddDev').onclick = async () => {
+  const name = $('devNameInput').value.trim();
+  const device = $('devAddrInput').value.trim();
+  if (!device){ toast('请填写设备地址，如 192.168.1.10:5555'); return; }
+  try {
+    await post('/api/devices', { action: 'add', name, device });
+    $('devNameInput').value = '';
+    $('devAddrInput').value = '';
+    await loadDevices(); await loadAdapter(); refresh();
+    toast('已添加并切换');
+  } catch (e) { toast('添加失败'); }
+};
+
+/* 设置 */
+function startTimer(ms){
+  if (timer) clearInterval(timer);
+  timer = setInterval(() => { refresh(); loadHistory(); }, Math.max(2500, ms));
 }
 
-async function addDevice(){
-  const name = $('dname').value.trim();
-  const addr = $('daddr').value.trim();
-  if(!addr){ alert('请填写设备地址，如 192.168.1.10:5555'); return; }
-  const r = await apiDevices({action:'add', name, device: addr});
-  if(r && r.ok){ $('dname').value=''; $('daddr').value=''; await loadDevices(); refresh(); }
-  else{ alert((r && r.msg) || '添加失败'); }
+async function loadSettings(){
+  try {
+    const s = await api('/api/settings');
+    $('setMask').checked = !!s.mask_sensitive;
+    $('setUpd').checked = !!s.check_updates;
+    $('setRecv').checked = !!s.auto_launch_receiver;
+    $('setSilent').checked = !!s.silent_launch;
+    $('setCastFg').checked = !!s.foreground_on_cast;
+    startTimer((s.refresh_seconds || 5) * 1000);
+  } catch (e) {}
 }
 
-async function removeDevice(id){
-  if(!confirm('删除该设备？')) return;
-  const r = await apiDevices({action:'remove', id});
-  if(r && r.ok){ await loadAdapter(); await loadDevices(); refresh(); }
+async function saveSetting(patch){
+  try { await post('/api/settings', patch); } catch (e) { toast('保存失败'); }
+}
+$('setMask').onchange = (e) => { saveSetting({ mask_sensitive: e.target.checked }); setTimeout(refresh, 300); };
+$('setUpd').onchange = (e) => { saveSetting({ check_updates: e.target.checked }); checkUpdate(); };
+$('setRecv').onchange = (e) => saveSetting({ auto_launch_receiver: e.target.checked });
+$('setSilent').onchange = (e) => saveSetting({ silent_launch: e.target.checked });
+$('setCastFg').onchange = (e) => saveSetting({ foreground_on_cast: e.target.checked });
+
+/* 更新 */
+async function checkUpdate(){
+  try {
+    const d = await api('/api/update');
+    const bar = $('updBanner');
+    if (d.has_update){
+      bar.hidden = false;
+      bar.innerHTML = `发现新版本 <b>v${esc(d.latest)}</b>（当前 v${esc(d.current)}）· <a href="${esc(d.url)}" target="_blank" rel="noopener">查看更新</a>`;
+    } else {
+      bar.hidden = true;
+    }
+  } catch (e) {}
 }
 
-function openManage(){ $('modal').style.display='flex'; loadDevices(); }
-function closeManage(){ $('modal').style.display='none'; }
+/* 弹窗 */
+$('btnManage').onclick = () => { $('modal').hidden = false; loadDevices(); loadSettings(); };
+$('btnCloseModal').onclick = () => { $('modal').hidden = true; };
+$('modal').addEventListener('click', (ev) => { if (ev.target === $('modal')) $('modal').hidden = true; });
 
-$('screen').src = '/api/screen' + TKQ;
-refresh();
-loadSettings();
+/* 启动 */
+$('btnRefresh').onclick = () => { refresh(); loadHistory(); loadAdapter(); };
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+$('screen').addEventListener('error', () => { $('screenHint').textContent = '画面不可用'; });
+
 loadAdapter();
 loadDevices();
-loadApps();
-checkUpdate();
+loadSettings();
+refresh();
 loadHistory();
-setInterval(loadHistory, 5000);
+checkUpdate();
 
-if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+if (new URLSearchParams(location.search).get('manage')) setTimeout(() => $('btnManage').click(), 300);
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')){
   navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
-if(new URLSearchParams(location.search).get('manage')) setTimeout(openManage, 300);
 </script>
 </body>
 </html>

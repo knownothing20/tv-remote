@@ -3,7 +3,7 @@
 > 仓库：<https://github.com/knownothing20/tv-remote> · 最新版见 [Releases](https://github.com/knownothing20/tv-remote/releases)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-1.7.0-blue)
+![Version](https://img.shields.io/badge/version-1.7.1-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3.11)
 
@@ -15,7 +15,7 @@
 
 ## 界面预览
 
-| 管理面板 | 机型适配器（包名 → 中文名） |
+| 管理面板（KPI 概览 + 两栏布局） | 机型适配器（包名 → 中文名 + 策略标签） |
 |---|---|
 | ![面板](assets/preview/panel_main.png) | ![适配器](assets/preview/panel_adapters.png) |
 
@@ -104,7 +104,7 @@ tv-remote/
 
 | 想改什么 | 怎么改 | 生效方式 |
 |---|---|---|
-| 面板布局、样式、交互 | 编辑 `web/index.html` | **刷新浏览器**（连服务都不用重启） |
+| 面板布局、样式、交互 | 编辑 `web/index.html` | **刷新浏览器**（后端按 mtime 自动重载，连服务都不用重启） |
 | 包名中文名 / 策略标签 | 编辑 `adapters/*.json` | 10 秒内生效，或托盘「重启服务（面板）」 |
 | 配置（设备 / 端口 / 口令） | 编辑 `local/config.json` | 托盘「重启服务（面板）」 |
 
@@ -254,7 +254,8 @@ powershell -ExecutionPolicy Bypass -File scripts/build.ps1
 | v1.4.0 | 更新检查 ✔ |
 | v1.5.0 | 面板体验（PWA / 主题 / 趋势图）✔ |
 | v1.6.0 | **机型适配器 ✔ 已发布** |
-| v1.7.0 | **面板/适配器外置，exe 瘦身 ✔ 已发布** |
+| v1.7.0 | 面板/适配器外置，exe 瘦身 ✔ |
+| v1.7.1 | **面板重构 + HTML 热重载 ✔ 已发布** |
 | v2.0.0 | 采集器插件化 + macOS / Linux 托盘 |
 
 发布流程：改 `__version__` 与 `CHANGELOG.md` → 打 tag `vX.Y.Z` → CI 自动构建 exe 并挂到 Release。

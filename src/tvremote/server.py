@@ -33,6 +33,7 @@ _cache_lock = threading.Lock()
 _screen_lock = threading.Lock()
 _boot_loading = False
 _html_cache: str | None = None
+_html_mtime: float = 0.0
 
 
 def init(config: Config | None = None) -> Config:
@@ -621,13 +622,20 @@ def do_action(cmd: str) -> dict:
 
 
 def load_html() -> str:
-    global _html_cache
-    if _html_cache is None:
+    """面板按文件修改时间自动重载：改 web/index.html 后刷新浏览器即生效。"""
+    global _html_cache, _html_mtime
+    path = resource_path(os.path.join("web", "index.html"))
+    try:
+        mtime = os.path.getmtime(path)
+    except Exception:
+        return _html_cache or "<h1>web/index.html 缺失</h1>"
+    if _html_cache is None or mtime != _html_mtime:
         try:
-            with open(resource_path(os.path.join("web", "index.html")), encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 _html_cache = f.read()
+            _html_mtime = mtime
         except Exception:
-            _html_cache = "<h1>web/index.html 缺失</h1>"
+            return _html_cache or "<h1>web/index.html 缺失</h1>"
     return _html_cache
 
 
