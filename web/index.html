@@ -404,6 +404,7 @@ function kvRows(pairs){
 }
 function fmtTs(ts){
   if (!ts) return '—';
+  if (typeof ts === 'string') return ts;        // 后端已格式化为 HH:MM:SS
   try { return new Date(ts * 1000).toLocaleTimeString('zh-CN', { hour12: false }); } catch (e) { return '—'; }
 }
 
@@ -540,8 +541,10 @@ function renderSpark(items){
   const lo = Math.min.apply(null, vals);
   const hi = Math.max.apply(null, vals);
   const span = Math.max(3, hi - lo);          // 至少 3 个百分点，避免平线
+  const mid = (lo + hi) / 2;
+  const base = mid - span / 2;                // 数值接近时把曲线放在中间
   const x = i => (i / (items.length - 1)) * (w - 2) + 1;
-  const y = v => h - 6 - ((v - lo) / span) * (h - 18);
+  const y = v => h - 6 - ((v - base) / span) * (h - 18);
 
   ctx.strokeStyle = grid;
   ctx.lineWidth = 1;
