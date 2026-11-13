@@ -23,9 +23,9 @@ jobs:
       - name: Verify executable and embedded panel
         shell: powershell
         run: |
-          # Windows GUI 子进程会异步返回，必须等待自检写完日志。
-          $process = Start-Process -FilePath "dist\TrayTVAdmin.exe" -ArgumentList "--selftest" -Wait -PassThru
-          if ($process.ExitCode -ne 0) { throw "Self-test exited with $($process.ExitCode)" }
+          # cmd /c 会等待 Windows GUI 子进程退出，避免过早读取自检日志。
+          cmd /c "dist\TrayTVAdmin.exe --selftest"
+          if ($LASTEXITCODE -ne 0) { throw "Self-test exited with $LASTEXITCODE" }
           $report = Get-Content local\logs\selftest.log -Raw | ConvertFrom-Json
           if (-not $report.backend_started -or -not $report.port_open -or -not $report.tray_menu_ok) {
             throw "Executable self-test failed"
