@@ -3,7 +3,7 @@
 > 仓库：<https://github.com/knownothing20/tv-remote> · 最新版见 [Releases](https://github.com/knownothing20/tv-remote/releases)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-1.7.1-blue)
+![Version](https://img.shields.io/badge/version-1.7.2-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3.11)
 
@@ -15,11 +15,11 @@
 
 ## 界面预览
 
-| 管理面板（KPI 概览 + 两栏布局） | 机型适配器（包名 → 中文名 + 策略标签） |
+| 设备概览（画面 + 快捷控制 + 资源状态） | 应用管理（中文名 + 包名 + 操作） |
 |---|---|
-| ![面板](assets/preview/panel_main.png) | ![适配器](assets/preview/panel_adapters.png) |
+| ![设备概览](assets/preview/panel_main.png) | ![应用管理](assets/preview/panel_adapters.png) |
 
-> 截图数据来自真实设备（TCL 65Q10K）；「实时画面」为占位图——截图时暂停了 MJPEG 流，避免暴露电视画面。
+> 预览使用脱敏示例数据；「实时画面」为中性占位图，不包含真实电视画面。
 > 面板是纯网页：手机 / iPad 打开同一地址即可，可「添加到主屏幕」当 App 用。
 
 ## 特性
@@ -82,14 +82,15 @@ python main.py --export-icons assets/icons
 
 ```bash
 docker run -d --name tv-remote -p 8777:8777 \
-  -e TVREMOTE_DEVICE=192.168.31.226:5555 \
+  -e TVREMOTE_DEVICE=192.168.1.10:5555 \
   -e TVREMOTE_HOST=0.0.0.0 \
   -v $(pwd)/local:/app/local \
   --restart unless-stopped \
   ghcr.io/knownothing20/tv-remote:latest
 ```
 
-镜像：`ghcr.io/knownothing20/tv-remote`（`amd64` / `arm64`，同时提供 `:vX.Y.Z` 版本标签）。
+镜像：`ghcr.io/knownothing20/tv-remote`（`amd64` / `arm64`）。
+已有镜像保留；从 v1.7.2 起，GitHub Actions 只构建 Windows exe，Docker 镜像不再随版本自动更新。
 部署细节、adb 授权与排错见 [docs/DOCKER.md](docs/DOCKER.md)。
 
 ## 不用重新打包就能改的东西
@@ -245,7 +246,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build.ps1
 
 ## 版本规划
 
-当前 **v1.0.0**，遵循 [语义化版本](https://semver.org/lang/zh-CN/)；完整路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
+当前 **v1.7.2**，遵循 [语义化版本](https://semver.org/lang/zh-CN/)；完整路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
 | 版本 | 主题 |
 |---|---|
@@ -257,6 +258,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build.ps1
 | v1.6.0 | **机型适配器 ✔ 已发布** |
 | v1.7.0 | 面板/适配器外置，exe 瘦身 ✔ |
 | v1.7.1 | **面板重构 + HTML 热重载 ✔ 已发布** |
+| v1.7.2 | **控制台四视图 + 精简 Windows 发布流程** |
 | v2.0.0 | 采集器插件化 + macOS / Linux 托盘 |
 
 发布流程：改 `__version__` 与 `CHANGELOG.md` → 打 tag `vX.Y.Z` → CI 自动构建 exe 并挂到 Release。

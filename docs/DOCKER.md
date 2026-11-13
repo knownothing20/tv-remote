@@ -7,12 +7,14 @@
 - 端口：`8777`
 - 架构：`linux/amd64`、`linux/arm64`（依赖发行版 `adb`）
 
+> v1.7.2 起，GitHub Actions 只发布 Windows exe。已有 GHCR 镜像保留，但不会随新版本自动更新；需要最新代码时可自行 `docker build -t tv-remote .`。
+
 ## 一句话启动
 
 ```bash
 docker run -d --name tv-remote \
   -p 8777:8777 \
-  -e TVREMOTE_DEVICE=192.168.31.226:5555 \
+  -e TVREMOTE_DEVICE=192.168.1.10:5555 \
   -e TVREMOTE_HOST=0.0.0.0 \
   -v $(pwd)/local:/app/local \
   --restart unless-stopped \
@@ -34,7 +36,7 @@ docker compose up -d
 
 | 变量 | 默认 | 说明 |
 |---|---|---|
-| `TVREMOTE_DEVICE` | — | 电视 ADB 地址，如 `192.168.31.226:5555` |
+| `TVREMOTE_DEVICE` | — | 电视 ADB 地址，如 `192.168.1.10:5555` |
 | `TVREMOTE_HOST` | `127.0.0.1` | 容器内必须是 `0.0.0.0` |
 | `TVREMOTE_PORT` | `8777` | 面板端口 |
 | `TVREMOTE_TOKEN` | 空 | 设置后所有请求需带 `?token=xxx` 或 `X-Auth-Token` 头 |
@@ -57,7 +59,7 @@ volumes:
 `TVREMOTE_TOKEN`，访问时带上参数：
 
 ```
-http://192.168.31.124:8777/?token=你的口令
+http://192.168.1.20:8777/?token=你的口令
 ```
 
 > 不要把面板直接暴露到公网。它没有账号体系，仅有可选的口令校验。
@@ -67,7 +69,7 @@ http://192.168.31.124:8777/?token=你的口令
 **面板显示「离线」**：容器内 `adb connect <IP>:5555` 失败。进容器排查：
 
 ```bash
-docker exec -it tv-remote adb connect 192.168.31.226:5555
+docker exec -it tv-remote adb connect 192.168.1.10:5555
 docker exec -it tv-remote adb devices
 ```
 

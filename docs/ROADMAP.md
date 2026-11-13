@@ -13,10 +13,16 @@
 - **预发布**：`v1.2.0-beta.1`，发布为 GitHub Pre-release
 - **分支**：`main` 保持可发布；功能走 `feat/<slug>`；发布走 `release/<version>`
 - **发布流程**：更新 `src/tvremote/__init__.py` 的 `__version__` 与 `CHANGELOG.md` → 提交 → 打 tag `vX.Y.Z` → 推送
-- **CI 产物**：Windows 单文件 exe（Release 附件）+ Docker 镜像（`ghcr.io/knownothing20/tv-remote`，amd64/arm64）
-- **版本标签**：Docker 同时推 `:latest` 与 `:vX.Y.Z`
+- **CI 产物**：Windows 单文件 exe（Release 附件）
+- **Docker**：保留 Dockerfile 与已有镜像，不再随版本自动构建发布
 
 ## 已发布
+
+### v1.7.2 · 2026-11-13
+
+- 设备概览 / 应用管理 / 运行状态 / 设备信息四个独立视图
+- 精简 workflow：Windows exe 构建、自检、Release 上传
+
 
 ### v1.6.0 · 2026-11-13
 

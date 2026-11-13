@@ -1,5 +1,5 @@
 /* tv-remote PWA service worker：只缓存静态外壳，API 一律走网络 */
-const CACHE = "tv-remote-shell-v1";
+const CACHE = "tv-remote-shell-v2";
 const SHELL = ["/", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (event) => {
