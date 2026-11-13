@@ -3,6 +3,16 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.4.0] - 2026-11-13
+
+更新检查。
+
+### Added
+
+- 面板顶部显示「可更新 vX.Y.Z」，点击跳转对应 Release（只提示，不自动下载）
+- `GET /api/update`：查询 GitHub Releases 最新版本，30 分钟缓存，失败静默降级
+- 设置项 `check_updates`（默认开启），可在「设备」弹窗内关闭
+
 ## [1.3.0] - 2026-11-13
 
 应用管理。

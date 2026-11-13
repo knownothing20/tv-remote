@@ -182,6 +182,7 @@ class Settings:
 
     mask_sensitive: bool = True
     refresh_seconds: int = 5
+    check_updates: bool = True
 
 
 def _read_json(path: str) -> dict:

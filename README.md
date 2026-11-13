@@ -3,7 +3,7 @@
 > 仓库：<https://github.com/knownothing20/tv-remote> · 最新版见 [Releases](https://github.com/knownothing20/tv-remote/releases)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-1.3.0-blue)
+![Version](https://img.shields.io/badge/version-1.4.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3.11)
 
@@ -167,6 +167,7 @@ tv-remote/
 | GET / POST | `/api/devices` | 设备列表 / 切换 / 新增 / 删除 |
 | GET | `/api/apps` | 已安装应用（`scope=third\|all`、`q=` 搜索） |
 | POST | `/api/app` | 应用操作：`open` / `stop` / `disable` / `enable` / `clear` / `uninstall` |
+| GET | `/api/update` | 查询 GitHub Releases 是否有新版本（30 分钟缓存） |
 | GET / POST | `/api/settings` | 读取 / 修改界面设置（`mask_sensitive`、`refresh_seconds`） |
 | GET | `/api/status` | 全量状态 JSON（硬件、内存、存储、网络、进程、服务、自启动…） |
 | GET | `/api/screen` | MJPEG 实时画面（单路，多路会返回 429） |
@@ -201,8 +202,8 @@ powershell -ExecutionPolicy Bypass -File scripts/build.ps1
 |---|---|
 | v1.1.0 | 局域网访问 + Docker ✔ |
 | v1.2.0 | 多设备管理 ✔ |
-| v1.3.0 | **应用管理 ✔ 已发布** |
-| v1.4.0 | 更新检查（只提示，不自动下载） |
+| v1.3.0 | 应用管理 ✔ |
+| v1.4.0 | **更新检查 ✔ 已发布** |
 | v1.5.0 | 面板体验（PWA / 主题切换 / 趋势图表） |
 | v2.0.0 | 采集器插件化 + macOS / Linux 托盘 |
 

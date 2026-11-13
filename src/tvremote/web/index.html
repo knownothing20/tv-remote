@@ -71,6 +71,7 @@ button.danger{color:#f85149;border-color:#6e2c2c}
   <label class="sw" title="默认隐藏 IP、序列号、Wi-Fi 名称；设置保存在 local/settings.json">
     <input type="checkbox" id="mask" checked onchange="toggleMask(this.checked)"> 隐藏敏感信息
   </label>
+  <a id="upd" class="pill" style="display:none;color:#d29922;cursor:pointer" target="_blank" rel="noopener">有新版本</a>
   <button onclick="refresh()">立即刷新</button>
 </header>
 <div class="grid">
@@ -122,6 +123,9 @@ button.danger{color:#f85149;border-color:#6e2c2c}
       <button class="pri" onclick="addDevice()">添加</button>
     </div>
     <div class="tag">保存在 local/devices.json；切换会同步写入 local/config.json</div>
+    <label class="sw" style="margin-top:12px">
+      <input type="checkbox" id="updchk" onchange="toggleUpdate(this.checked)"> 启动时检查 GitHub 新版本
+    </label>
     <div class="btns" style="justify-content:flex-end"><button onclick="closeManage()">关闭</button></div>
   </div>
 </div>
@@ -191,6 +195,7 @@ async function loadSettings(){
   try{
     const s = await (await fetch('/api/settings' + TKQ)).json();
     $('mask').checked = !!s.mask_sensitive;
+    $('updchk').checked = !!s.check_updates;
     startTimer((s.refresh_seconds || 5) * 1000);
   }catch(e){
     startTimer(5000);
@@ -206,6 +211,32 @@ async function toggleMask(on){
     });
   }catch(e){}
   refresh();
+}
+
+async function checkUpdate(){
+  try{
+    const d = await (await fetch('/api/update' + TKQ, {headers: AUTH})).json();
+    const a = $('upd');
+    if(d.has_update){
+      a.textContent = '可更新 v' + d.latest;
+      a.href = d.url || '#';
+      a.style.display = 'inline-block';
+      a.title = '当前 v' + d.current;
+    }else{
+      a.style.display = 'none';
+    }
+  }catch(e){}
+}
+
+async function toggleUpdate(on){
+  try{
+    await fetch('/api/settings' + TKQ, {
+      method: 'POST',
+      headers: Object.assign({'Content-Type': 'application/json'}, AUTH),
+      body: JSON.stringify({check_updates: on})
+    });
+  }catch(e){}
+  checkUpdate();
 }
 
 async function loadApps(){
@@ -295,6 +326,7 @@ refresh();
 loadSettings();
 loadDevices();
 loadApps();
+checkUpdate();
 if(new URLSearchParams(location.search).get('manage')) setTimeout(openManage, 300);
 </script>
 </body>

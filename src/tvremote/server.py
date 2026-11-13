@@ -378,6 +378,52 @@ def do_app_action(cmd: str, pkg: str) -> dict:
     }
 
 
+def _ver_tuple(version: str) -> tuple:
+    parts = re.findall(r"\d+", version or "")[:3]
+    return tuple(int(p) for p in parts) + (0,) * (3 - len(parts))
+
+
+def get_update_info() -> dict:
+    """查询 GitHub Releases 最新版本；关闭检查时直接返回 disabled。"""
+    info = {
+        "current": __version__,
+        "enabled": load_settings().check_updates,
+        "latest": "",
+        "has_update": False,
+        "url": "",
+        "error": "",
+    }
+    if not info["enabled"]:
+        return info
+
+    def _fetch() -> dict:
+        import urllib.request
+
+        req = urllib.request.Request(
+            "https://api.github.com/repos/knownothing20/tv-remote/releases/latest",
+            headers={"User-Agent": "tv-remote", "Accept": "application/vnd.github+json"},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            return {
+                "latest": (data.get("tag_name") or "").lstrip("v"),
+                "url": data.get("html_url") or "",
+                "published": data.get("published_at") or "",
+            }
+        except Exception as e:  # noqa: BLE001
+            return {"error": str(e)[:140]}
+
+    remote = cached("update", 1800, _fetch)
+    if remote.get("error"):
+        info["error"] = remote["error"]
+        return info
+    info["latest"] = remote.get("latest", "")
+    info["url"] = remote.get("url", "")
+    info["has_update"] = bool(info["latest"]) and _ver_tuple(info["latest"]) > _ver_tuple(__version__)
+    return info
+
+
 def get_whitelist() -> list:
     return [l.split(",")[1] for l in sh("cmd deviceidle whitelist", timeout=10).splitlines() if l.count(",") >= 1]
 
@@ -517,11 +563,14 @@ class Handler(BaseHTTPRequestHandler):
             scope = qs.get("scope", ["third"])[0] or "third"
             query = qs.get("q", [""])[0]
             self._send(200, json.dumps({"items": get_apps(scope, query)}, ensure_ascii=False))
+        elif path == "/api/update":
+            self._send(200, json.dumps(get_update_info(), ensure_ascii=False))
         elif path == "/api/settings":
             s = load_settings()
             self._send(200, json.dumps({
                 "mask_sensitive": s.mask_sensitive,
                 "refresh_seconds": s.refresh_seconds,
+                "check_updates": s.check_updates,
             }, ensure_ascii=False))
         elif path == "/api/screen":
             self.stream_screen()
@@ -552,11 +601,15 @@ class Handler(BaseHTTPRequestHandler):
             s = update_settings(
                 mask_sensitive=body.get("mask_sensitive"),
                 refresh_seconds=body.get("refresh_seconds"),
+                check_updates=body.get("check_updates"),
             )
+            with _cache_lock:
+                _cache.pop("update", None)
             self._send(200, json.dumps({
                 "ok": True,
                 "mask_sensitive": s.mask_sensitive,
                 "refresh_seconds": s.refresh_seconds,
+                "check_updates": s.check_updates,
             }, ensure_ascii=False))
             return
 
