@@ -13,6 +13,14 @@
 
 > 图标双态：**屏幕黑 = 未连接**，**屏幕亮 = 已连接**。机身完全一致，只有屏幕变化。
 
+## 界面预览
+
+| 管理面板 | 机型适配器（包名 → 中文名） |
+|---|---|
+| ![面板](assets/preview/panel_main.png) | ![适配器](assets/preview/panel_adapters.png) |
+
+> 面板是纯网页：手机 / iPad 打开同一地址即可，可「添加到主屏幕」当 App 用。
+
 ## 特性
 
 | 能力 | 说明 |
@@ -28,6 +36,8 @@
 | PWA | 可添加到主屏；浅色/深色主题；内存趋势曲线 |
 | 守护 | 接收端未运行时静默拉起；**投屏时自动切前台**（否则只有声音没有画面） |
 | 机型适配器 | 包名 → 中文名 / 角色 / 是否可停用，按机型 JSON 匹配（[docs/ADAPTERS.md](docs/ADAPTERS.md)） |
+| 托盘重启 | 「重启服务（面板）」重载配置、「重启程序」让新 exe 立即生效 |
+| 面板可热改 | `web/` 改完刷新即生效，`adapters/` 改完 10 秒生效，无需重新打包 |
 | 托盘 | 右键菜单：打开面板 / 复制地址 / 重启服务 / 退出（退出即停服务） |
 
 ## 快速开始
@@ -167,6 +177,8 @@ local/
 ```
 tv-remote/
 ├─ main.py                  # 入口（PyInstaller 打包入口 / 源码运行）
+├─ web/                     # 面板（HTML/CSS/JS + PWA），exe 同级热加载
+├─ adapters/                # 机型适配器（包名 → 中文名）
 ├─ config.example.json      # 配置模板
 ├─ requirements.txt
 ├─ assets/
@@ -240,7 +252,9 @@ powershell -ExecutionPolicy Bypass -File scripts/build.ps1
 | v1.2.0 | 多设备管理 ✔ |
 | v1.3.0 | 应用管理 ✔ |
 | v1.4.0 | 更新检查 ✔ |
-| v1.5.0 | **面板体验（PWA / 主题 / 趋势图）✔ 已发布** |
+| v1.5.0 | 面板体验（PWA / 主题 / 趋势图）✔ |
+| v1.6.0 | **机型适配器 ✔ 已发布** |
+| v1.7.0 | **面板/适配器外置，exe 瘦身 ✔ 已发布** |
 | v2.0.0 | 采集器插件化 + macOS / Linux 托盘 |
 
 发布流程：改 `__version__` 与 `CHANGELOG.md` → 打 tag `vX.Y.Z` → CI 自动构建 exe 并挂到 Release。
