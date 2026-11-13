@@ -92,6 +92,18 @@ def copy_clip(text: str) -> bool:
         return False
 
 
+def dashboard_url(config: Config, extra: str = "") -> str:
+    """面板地址：自动附带访问口令，避免开启 token 后被 401 挡住。"""
+    url = config.url + "/"
+    if config.token:
+        url += "?token=" + quote(config.token)
+        if extra:
+            url += "&" + extra
+    elif extra:
+        url += "?" + extra
+    return url
+
+
 def device_menu_items(switch_to, open_panel):
     """构建设备子菜单。
 
@@ -133,10 +145,10 @@ def run_tray(config: Config):
     backend.start()
 
     def open_dash(icon=None, item=None):
-        webbrowser.open(config.url)
+        webbrowser.open(dashboard_url(config))
 
     def do_copy(icon=None, item=None):
-        copy_clip(config.url)
+        copy_clip(dashboard_url(config))
 
     def do_restart(icon=None, item=None):
         backend.stop()
@@ -159,7 +171,7 @@ def run_tray(config: Config):
     menu = Menu(
         MenuItem("打开管理后台", open_dash, default=True),
         MenuItem("设备", Menu(*device_menu_items(
-            switch_to, lambda: webbrowser.open(config.url + "/?manage=1")))),
+            switch_to, lambda: webbrowser.open(dashboard_url(config, "manage=1"))))),
         MenuItem("复制访问地址", do_copy),
         Menu.SEPARATOR,
         MenuItem("重启服务", do_restart),

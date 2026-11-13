@@ -3,6 +3,15 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.5.5] - 2026-11-13
+
+### Fixed
+
+- **托盘「打开管理后台」被 401 挡住**：启用 `token` 后面板需要口令，而菜单打开的是不带
+  口令的裸地址。现在「打开管理后台」「复制访问地址」「设备管理」都会自动附带 `?token=`。
+- 未带口令访问首页时，返回可读的 HTML 提示页（说明口令位置与正确地址），不再是无提示的
+  `{"error":"unauthorized"}` JSON。
+
 ## [1.5.4] - 2026-11-13
 
 ### Fixed

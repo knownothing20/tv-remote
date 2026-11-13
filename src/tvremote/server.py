@@ -574,9 +574,29 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:
             self._send(404, b"not found", "text/plain; charset=utf-8")
 
+    def _unauthorized(self):
+        """401：首页给可读的提示页，API 返回 JSON。"""
+        if urlparse(self.path).path in ("", "/"):
+            page = (
+                "<!DOCTYPE html><html lang='zh-CN'><head><meta charset='utf-8'>"
+                "<title>需要访问口令</title><meta name='viewport' content='width=device-width,initial-scale=1'>"
+                "</head><body style=\"font-family:-apple-system,'Segoe UI','Microsoft YaHei',sans-serif;"
+                "background:#0d1117;color:#e6edf3;padding:48px;line-height:1.7\">"
+                "<h2 style='font-weight:500'>需要访问口令</h2>"
+                "<p style='color:#8b949e'>已在 <code>local/config.json</code> 启用 <code>token</code>，"
+                "请在地址后加上口令：</p>"
+                "<pre style='background:#161b22;border:1px solid #21262d;border-radius:8px;padding:12px'>"
+                "http://127.0.0.1:8777/?token=你的口令</pre>"
+                "<p style='color:#8b949e'>托盘右键「复制访问地址」会自动带上口令。</p>"
+                "</body></html>"
+            )
+            self._send(401, page, "text/html; charset=utf-8")
+        else:
+            self._send(401, json.dumps({"error": "unauthorized"}, ensure_ascii=False))
+
     def do_GET(self):
         if not self._authorized():
-            self._send(401, json.dumps({"error": "unauthorized"}, ensure_ascii=False))
+            self._unauthorized()
             return
         path = urlparse(self.path).path
         if path == "/":
@@ -624,7 +644,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         if not self._authorized():
-            self._send(401, json.dumps({"error": "unauthorized"}, ensure_ascii=False))
+            self._unauthorized()
             return
         path = urlparse(self.path).path
         try:
