@@ -21,13 +21,11 @@ jobs:
         run: powershell -ExecutionPolicy Bypass -File scripts/build.ps1
 
       - name: Verify executable and embedded panel
-        shell: cmd
-        run: dist\TrayTVAdmin.exe --selftest
-
-      - name: Check self-test result
         shell: powershell
         run: |
-          dist\TrayTVAdmin.exe --selftest
+          # Windows GUI 子进程会异步返回，必须等待自检写完日志。
+          $process = Start-Process -FilePath "dist\TrayTVAdmin.exe" -ArgumentList "--selftest" -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "Self-test exited with $($process.ExitCode)" }
           $report = Get-Content local\logs\selftest.log -Raw | ConvertFrom-Json
           if (-not $report.backend_started -or -not $report.port_open -or -not $report.tray_menu_ok) {
             throw "Executable self-test failed"
