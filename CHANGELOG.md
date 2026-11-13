@@ -3,6 +3,19 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.6.1] - 2026-11-13
+
+托盘重启体验。
+
+### Added
+
+- 托盘菜单 **「重启程序（更新后生效）」**：替换 exe 后一键重启自身，不再需要「退出 → 双击 lnk」
+
+### Changed
+
+- 「重启服务」更名为 **「重启服务（面板）」**，并会重新读取 `local/config.json`
+  （端口 / 口令 / 设备地址改动即时生效），完成后弹气泡提示
+
 ## [1.6.0] - 2026-11-13
 
 机型适配器（package → 中文名）。

@@ -16,7 +16,7 @@ import webbrowser
 from urllib.parse import quote
 
 from . import __version__, icons, privacy, server
-from .config import Config, load_config, load_devices, logs_dir, set_active_device
+from .config import Config, app_dir, load_config, load_devices, logs_dir, set_active_device
 
 
 def log(msg: str, name: str = "tray.log"):
@@ -151,9 +151,36 @@ def run_tray(config: Config):
         copy_clip(dashboard_url(config))
 
     def do_restart(icon=None, item=None):
+        """只重启面板后端：重新读配置（localhost:端口/口令/设备），不重启程序。"""
         backend.stop()
-        time.sleep(0.6)
-        backend.start()
+        time.sleep(0.5)
+        backend.cfg = load_config()
+        ok = backend.start()
+        try:
+            icon.title = f"电视管理后台 v{__version__} · {backend.cfg.device}"
+        except Exception:
+            pass
+        try:
+            icon.notify("服务已重启" if ok else "重启失败，详见 local/logs/tray.log")
+        except Exception:
+            pass
+        log("restart service: %s" % ("ok" if ok else "failed"))
+
+    def do_relaunch(icon=None, item=None):
+        """整套程序重启：替换 exe 之后让新版本立刻生效，不用手动退出再打开。"""
+        backend.stop()
+        time.sleep(0.3)
+        try:
+            if getattr(sys, "frozen", False):
+                subprocess.Popen([sys.executable], cwd=app_dir())
+            else:
+                subprocess.Popen([sys.executable, os.path.join(app_dir(), "main.py")],
+                                 cwd=app_dir())
+            log("relaunch requested")
+        except Exception as e:  # noqa: BLE001
+            log("relaunch failed: %r" % e)
+        icon.visible = False
+        icon.stop()
 
     def do_quit(icon=None, item=None):
         backend.stop()
@@ -174,7 +201,8 @@ def run_tray(config: Config):
             switch_to, lambda: webbrowser.open(dashboard_url(config, "manage=1"))))),
         MenuItem("复制访问地址", do_copy),
         Menu.SEPARATOR,
-        MenuItem("重启服务", do_restart),
+        MenuItem("重启服务（面板）", do_restart),
+        MenuItem("重启程序（更新后生效）", do_relaunch),
         Menu.SEPARATOR,
         MenuItem("退出（关闭服务）", do_quit),
     )
