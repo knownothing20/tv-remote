@@ -216,7 +216,8 @@ class Settings:
     mask_sensitive: bool = True
     refresh_seconds: int = 5
     check_updates: bool = True
-    auto_launch_receiver: bool = False   # 电视恢复在线时自动打开投屏接收端
+    auto_launch_receiver: bool = False   # 电视在线且接收端未运行时自动拉起
+    silent_launch: bool = True           # 拉起后立即退回原画面，不把接收端留在前台
 
 
 def _read_json(path: str) -> dict:

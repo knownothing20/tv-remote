@@ -132,8 +132,11 @@ canvas#chart{width:100%;height:52px;display:block;margin-top:8px}
     <label class="sw" style="margin-top:12px">
       <input type="checkbox" id="updchk" onchange="toggleUpdate(this.checked)"> 启动时检查 GitHub 新版本
     </label>
-    <label class="sw" style="margin-top:8px" title="电视重启后 CastBay 不会自启，勾选后由本机服务在电视恢复在线时自动拉起">
-      <input type="checkbox" id="recvchk" onchange="toggleReceiver(this.checked)"> 电视恢复在线时自动打开映湾
+    <label class="sw" style="margin-top:8px" title="电视重启后 CastBay 不会自启，勾选后由本机服务在电视在线时自动拉起">
+      <input type="checkbox" id="recvchk" onchange="toggleReceiver(this.checked)"> 电视在线时自动打开映湾
+    </label>
+    <label class="sw" style="margin-top:8px" title="拉起后立刻退回原画面，不在电视上停留在映湾界面；正在播放视频时不打扰">
+      <input type="checkbox" id="silentchk" onchange="toggleSilent(this.checked)"> 静默拉起（不留在映湾界面）
     </label>
     <div class="btns" style="justify-content:flex-end"><button onclick="closeManage()">关闭</button></div>
   </div>
@@ -224,6 +227,7 @@ async function loadSettings(){
     $('mask').checked = !!s.mask_sensitive;
     $('updchk').checked = !!s.check_updates;
     $('recvchk').checked = !!s.auto_launch_receiver;
+    $('silentchk').checked = !!s.silent_launch;
     startTimer((s.refresh_seconds || 5) * 1000);
   }catch(e){
     startTimer(5000);
@@ -273,6 +277,16 @@ async function toggleReceiver(on){
       method: 'POST',
       headers: Object.assign({'Content-Type': 'application/json'}, AUTH),
       body: JSON.stringify({auto_launch_receiver: on})
+    });
+  }catch(e){}
+}
+
+async function toggleSilent(on){
+  try{
+    await fetch('/api/settings' + TKQ, {
+      method: 'POST',
+      headers: Object.assign({'Content-Type': 'application/json'}, AUTH),
+      body: JSON.stringify({silent_launch: on})
     });
   }catch(e){}
 }

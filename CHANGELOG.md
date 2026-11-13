@@ -3,6 +3,15 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.5.8] - 2026-11-13
+
+### Changed
+
+- 守护改为**静默拉起**（设置项 `silent_launch`，默认开启）：拉起接收端后约 1.4 秒自动退回
+  原来的应用 / 桌面，不会把映湾界面留在电视上。
+- 守护前先检查媒体播放状态：**正在播放视频/音乐时不打扰**。
+- 面板「设备」弹窗新增「静默拉起（不留在映湾界面）」开关。
+
 ## [1.5.7] - 2026-11-13
 
 ### Added

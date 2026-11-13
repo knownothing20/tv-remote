@@ -459,23 +459,47 @@ _launch_guard = {"t": 0.0}
 RECEIVER_PKG = "com.weenas.castbay"
 
 
+def _foreground_pkg() -> str:
+    m = re.search(r"u0 ([\w.]+)/", sh("dumpsys activity activities | grep -m1 mResumedActivity", timeout=10))
+    return m.group(1) if m else ""
+
+
+def _media_playing() -> bool:
+    """检测是否有媒体正在播放，避免打断观看。"""
+    out = sh("dumpsys media_session | grep -m1 -E 'state=PlaybackState \\{state=3'", timeout=12)
+    return bool(out.strip())
+
+
 def _maybe_launch_receiver() -> None:
-    """按设置确保投屏接收端在运行（CastBay 无后台服务，重启后可能不自启/会被杀）。"""
+    """按设置确保投屏接收端在运行；silent_launch 时拉起后立刻退回原画面。"""
     now = time.time()
     if now - _launch_guard["t"] < 60:      # 最多每分钟尝试一次，避免与用户手动关闭打架
         return
     try:
-        if not load_settings().auto_launch_receiver:
+        settings = load_settings()
+        if not settings.auto_launch_receiver:
             return
         if sh(f"pidof {RECEIVER_PKG}", timeout=6):
             return
+        if _media_playing():
+            return
     except Exception:
         return
+
     _launch_guard["t"] = now
+    silent = getattr(settings, "silent_launch", True)
+    prev_pkg = _foreground_pkg() if silent else ""
 
     def _go():
         try:
             sh(f"monkey -p {RECEIVER_PKG} 1", timeout=20)
+            if not silent:
+                return
+            time.sleep(1.4)               # 等接收端起来（广播/端口就绪）
+            if prev_pkg and prev_pkg != RECEIVER_PKG and not prev_pkg.startswith("com.tcl.cyberui"):
+                sh(f"monkey -p {prev_pkg} 1", timeout=15)   # 回到原来的应用
+            else:
+                sh("input keyevent 3", timeout=10)          # 回桌面
         except Exception:
             pass
 
@@ -666,6 +690,7 @@ class Handler(BaseHTTPRequestHandler):
                 "refresh_seconds": s.refresh_seconds,
                 "check_updates": s.check_updates,
                 "auto_launch_receiver": s.auto_launch_receiver,
+                "silent_launch": s.silent_launch,
             }, ensure_ascii=False))
         elif path == "/api/screen":
             self.stream_screen()
@@ -698,6 +723,7 @@ class Handler(BaseHTTPRequestHandler):
                 refresh_seconds=body.get("refresh_seconds"),
                 check_updates=body.get("check_updates"),
                 auto_launch_receiver=body.get("auto_launch_receiver"),
+                silent_launch=body.get("silent_launch"),
             )
             with _cache_lock:
                 _cache.pop("update", None)
@@ -707,6 +733,7 @@ class Handler(BaseHTTPRequestHandler):
                 "refresh_seconds": s.refresh_seconds,
                 "check_updates": s.check_updates,
                 "auto_launch_receiver": s.auto_launch_receiver,
+                "silent_launch": s.silent_launch,
             }, ensure_ascii=False))
             return
 
