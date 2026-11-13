@@ -424,6 +424,25 @@ def get_update_info() -> dict:
     return info
 
 
+_history: list = []
+_history_lock = threading.Lock()
+
+
+def _record_history(mem: dict) -> None:
+    with _history_lock:
+        _history.append({
+            "t": int(time.time()),
+            "mem": mem.get("pct", 0),
+            "avail": mem.get("avail_mb", 0),
+        })
+        del _history[:-180]
+
+
+def get_history() -> list:
+    with _history_lock:
+        return list(_history)
+
+
 def get_whitelist() -> list:
     return [l.split(",")[1] for l in sh("cmd deviceidle whitelist", timeout=10).splitlines() if l.count(",") >= 1]
 
@@ -464,6 +483,7 @@ def collect_status() -> dict:
         return privacy.apply_status(st, mask)
     st["props"] = get_props()
     st["mem"] = get_mem()
+    _record_history(st["mem"])
     st["uptime"] = get_uptime()
     st["storage"] = get_storage()
     st["net"] = get_network()
@@ -541,6 +561,13 @@ class Handler(BaseHTTPRequestHandler):
 
         return parse_qs(urlparse(self.path).query).get("token", [""])[0] == token
 
+    def _static(self, name: str, ctype: str):
+        try:
+            with open(resource_path(os.path.join("web", name)), "rb") as f:
+                self._send(200, f.read(), ctype)
+        except Exception:
+            self._send(404, b"not found", "text/plain; charset=utf-8")
+
     def do_GET(self):
         if not self._authorized():
             self._send(401, json.dumps({"error": "unauthorized"}, ensure_ascii=False))
@@ -565,6 +592,18 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, json.dumps({"items": get_apps(scope, query)}, ensure_ascii=False))
         elif path == "/api/update":
             self._send(200, json.dumps(get_update_info(), ensure_ascii=False))
+        elif path == "/api/history":
+            self._send(200, json.dumps({"items": get_history()}, ensure_ascii=False))
+        elif path == "/manifest.webmanifest":
+            self._static("manifest.webmanifest", "application/manifest+json; charset=utf-8")
+        elif path == "/sw.js":
+            self._static("sw.js", "application/javascript; charset=utf-8")
+        elif path == "/icon-192.png":
+            self._static("icon-192.png", "image/png")
+        elif path == "/icon-512.png":
+            self._static("icon-512.png", "image/png")
+        elif path == "/favicon.ico":
+            self._static("icon-192.png", "image/png")
         elif path == "/api/settings":
             s = load_settings()
             self._send(200, json.dumps({

@@ -3,6 +3,21 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.5.0] - 2026-11-13
+
+面板体验。
+
+### Added
+
+- **PWA**：`manifest.webmanifest` + Service Worker + 192/512 图标，手机 / iPad 可「添加到主屏」独立打开
+- **浅色 / 深色主题**：跟随系统，右上角 ◐ 手动切换，选择存 localStorage
+- **内存趋势图**：服务端保留最近 180 个采样点，面板用 canvas 绘制 3 分钟曲线
+- `GET /api/history`
+
+### Changed
+
+- 面板配色全面改为 CSS 变量，主题切换无闪烁
+
 ## [1.4.0] - 2026-11-13
 
 更新检查。

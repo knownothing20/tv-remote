@@ -4,8 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>电视管理后台</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0d1117">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <style>
-:root{--bg:#0d1117;--card:#161b22;--line:#21262d;--txt:#e6edf3;--dim:#8b949e;--acc:#58a6ff;--ok:#3fb950;--warn:#d29922;--bad:#f85149}
+:root{--bg:#0d1117;--card:#161b22;--line:#21262d;--txt:#e6edf3;--dim:#8b949e;--acc:#58a6ff;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--btn:#21262d;--btnline:#30363d;--hover:#30363d;--dash:#1d2229;--chart:#58a6ff}
+html[data-theme="light"]{--bg:#f4f6f8;--card:#ffffff;--line:#e3e7ec;--txt:#1f2328;--dim:#6b7280;--acc:#1f6feb;--ok:#1a7f37;--warn:#9a6700;--bad:#cf222e;--btn:#f2f4f7;--btnline:#d8dde3;--hover:#e9edf2;--dash:#eceff3;--chart:#1f6feb}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--txt);font:14px/1.5 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif;padding:20px}
 header{display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap}
@@ -17,46 +21,47 @@ h1{font-size:20px;font-weight:600}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
 .card h2{font-size:13px;color:var(--dim);font-weight:600;letter-spacing:.05em;margin-bottom:10px}
-.row{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px dashed #1d2229;font-size:13px}
+.row{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px dashed var(--dash);font-size:13px}
 .row:last-child{border:0}
 .row b{font-weight:500;color:var(--txt)}
 .k{color:var(--dim)}
-.bar{height:6px;background:#21262d;border-radius:3px;overflow:hidden;margin:6px 0 2px}
+.bar{height:6px;background:var(--btn);border-radius:3px;overflow:hidden;margin:6px 0 2px}
 .bar>i{display:block;height:100%;background:var(--acc)}
 .bar.warn>i{background:var(--warn)}
 .bar.bad>i{background:var(--bad)}
 ul{list-style:none;max-height:230px;overflow:auto;font-size:12.5px}
-ul li{padding:3px 0;border-bottom:1px dashed #1d2229;color:#c9d1d9;word-break:break-all}
+ul li{padding:3px 0;border-bottom:1px dashed var(--dash);color:#c9d1d9;word-break:break-all}
 ul li:last-child{border:0}
 .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-button{background:#21262d;color:var(--txt);border:1px solid #30363d;border-radius:7px;padding:7px 12px;font-size:13px;cursor:pointer}
-button:hover{background:#30363d;border-color:var(--acc)}
+button{background:var(--btn);color:var(--txt);border:1px solid var(--btnline);border-radius:7px;padding:7px 12px;font-size:13px;cursor:pointer}
+button:hover{background:var(--hover);border-color:var(--acc)}
 button.pri{background:#1f6feb;border-color:#1f6feb}
 button.pri:hover{background:#388bfd}
 #screen{width:100%;border-radius:8px;background:#000;display:block;min-height:180px}
 .tag{font-size:11px;color:var(--dim);margin-top:6px}
-.pill{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;background:#21262d;color:var(--dim);margin-left:6px}
+.pill{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;background:var(--btn);color:var(--dim);margin-left:6px}
 .sw{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);cursor:pointer;user-select:none}
 .sw input{accent-color:#58a6ff;cursor:pointer}
-select.sel{background:#161b22;color:var(--txt);border:1px solid #30363d;border-radius:7px;padding:6px 9px;font-size:13px;max-width:190px}
+select.sel{background:var(--card);color:var(--txt);border:1px solid var(--btnline);border-radius:7px;padding:6px 9px;font-size:13px;max-width:190px}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50}
 .modal .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;width:min(520px,92vw)}
 .modal h3{font-size:15px;font-weight:500;margin-bottom:12px}
-.devit{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed #1d2229;font-size:13px}
+.devit{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--dash);font-size:13px}
 .devit:last-of-type{border:0}
 .devit .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .devit .ad{color:var(--dim);font-size:12px}
-input.ipt{background:#0d1117;color:var(--txt);border:1px solid #30363d;border-radius:7px;padding:7px 9px;font-size:13px;width:100%}
+input.ipt{background:var(--bg);color:var(--txt);border:1px solid var(--btnline);border-radius:7px;padding:7px 9px;font-size:13px;width:100%}
 .addrow{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:12px}
 button.mini{padding:5px 10px;font-size:12px}
-button.danger{color:#f85149;border-color:#6e2c2c}
+button.danger{color:var(--bad);border-color:#6e2c2c}
 .appbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .applist{max-height:320px}
-.approw{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed #1d2229;font-size:12.5px}
+.approw{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--dash);font-size:12.5px}
 .approw .pkg{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .approw .vf{color:var(--dim);font-size:11px;white-space:nowrap}
 .approw button{padding:3px 8px;font-size:11px}
 .approw button:disabled{opacity:.35;cursor:not-allowed}
+canvas#chart{width:100%;height:52px;display:block;margin-top:8px}
 </style>
 </head>
 <body>
@@ -72,6 +77,7 @@ button.danger{color:#f85149;border-color:#6e2c2c}
     <input type="checkbox" id="mask" checked onchange="toggleMask(this.checked)"> 隐藏敏感信息
   </label>
   <a id="upd" class="pill" style="display:none;color:#d29922;cursor:pointer" target="_blank" rel="noopener">有新版本</a>
+  <button class="mini" onclick="toggleTheme()" title="切换浅色/深色">◐</button>
   <button onclick="refresh()">立即刷新</button>
 </header>
 <div class="grid">
@@ -103,7 +109,7 @@ button.danger{color:#f85149;border-color:#6e2c2c}
   </div>
 
   <div class="card"><h2>硬件信息</h2><div id="hw"></div></div>
-  <div class="card"><h2>内存 &amp; 运行时长</h2><div id="mem"></div></div>
+  <div class="card"><h2>内存 &amp; 运行时长</h2><div id="mem"></div><canvas id="chart"></canvas><div class="tag">最近 3 分钟内存占用趋势</div></div>
   <div class="card"><h2>存储</h2><div id="sto"></div></div>
   <div class="card"><h2>网络</h2><div id="net"></div></div>
   <div class="card"><h2>前台应用</h2><div id="fg"></div></div>
@@ -134,6 +140,24 @@ const $ = id => document.getElementById(id);
 const TK = new URLSearchParams(location.search).get('token') || '';
 const TKQ = TK ? ('?token=' + encodeURIComponent(TK)) : '';
 const AUTH = TK ? {'X-Auth-Token': TK} : {};
+
+function applyTheme(t){
+  document.documentElement.dataset.theme = t;
+  try{ localStorage.setItem('tvtheme', t); }catch(e){}
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute('content', t === 'light' ? '#f4f6f8' : '#0d1117');
+}
+
+function toggleTheme(){
+  applyTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
+  loadHistory();
+}
+
+(function initTheme(){
+  let saved = null;
+  try{ saved = localStorage.getItem('tvtheme'); }catch(e){}
+  applyTheme(saved || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'));
+})();
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const row = (k, v) => `<div class="row"><span class="k">${esc(k)}</span><b>${esc(v)}</b></div>`;
 const bar = pct => `<div class="bar ${pct>85?'bad':pct>65?'warn':''}"><i style="width:${Math.min(pct,100)}%"></i></div>`;
@@ -276,6 +300,51 @@ async function appAct(pkg, cmd){
   refresh();
 }
 
+async function loadHistory(){
+  try{
+    const d = await (await fetch('/api/history' + TKQ, {headers: AUTH})).json();
+    drawChart(d.items || []);
+  }catch(e){}
+}
+
+function drawChart(items){
+  const cv = $('chart');
+  if(!cv || !cv.getContext) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth || 300, h = 52;
+  cv.width = Math.round(w * dpr);
+  cv.height = Math.round(h * dpr);
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+
+  const style = getComputedStyle(document.documentElement);
+  const line = style.getPropertyValue('--chart').trim() || '#58a6ff';
+  const grid = style.getPropertyValue('--dash').trim() || '#1d2229';
+
+  ctx.strokeStyle = grid;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, h - 1.5);
+  ctx.lineTo(w, h - 1.5);
+  ctx.stroke();
+
+  if(items.length < 2) return;
+  const vals = items.map(i => Number(i.mem) || 0);
+  const x = i => (i / (items.length - 1)) * (w - 4) + 2;
+  const y = v => h - 5 - (Math.min(v, 100) / 100) * (h - 12);
+
+  ctx.strokeStyle = line;
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  vals.forEach((v, i) => (i ? ctx.lineTo(x(i), y(v)) : ctx.moveTo(x(i), y(v))));
+  ctx.stroke();
+
+  ctx.fillStyle = line;
+  ctx.font = '11px sans-serif';
+  ctx.fillText(vals[vals.length - 1] + '%', w - 34, 12);
+}
+
 async function apiDevices(payload){
   const opt = payload ? {method:'POST', headers: Object.assign({'Content-Type':'application/json'}, AUTH), body: JSON.stringify(payload)} : {};
   const r = await fetch('/api/devices' + TKQ, opt);
@@ -327,6 +396,12 @@ loadSettings();
 loadDevices();
 loadApps();
 checkUpdate();
+loadHistory();
+setInterval(loadHistory, 5000);
+
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
 if(new URLSearchParams(location.search).get('manage')) setTimeout(openManage, 300);
 </script>
 </body>
