@@ -15,7 +15,7 @@ import urllib.request
 import webbrowser
 
 from . import __version__, icons, privacy, server
-from .config import Config, load_config, logs_dir
+from .config import Config, load_config, load_devices, logs_dir, set_active_device
 
 
 def log(msg: str, name: str = "tray.log"):
@@ -113,8 +113,36 @@ def run_tray(config: Config):
         icon.visible = False
         icon.stop()
 
+    def switch_to(icon, device_id):
+        target = set_active_device(device_id)
+        if target:
+            server.set_device(target["device"], target.get("adb") or "")
+            log(f"switch device -> {target.get('name') or target['device']}")
+            icon.update_menu()
+            icon.notify(f"已切换到 {target.get('name') or target['device']}")
+
+    def device_items():
+        try:
+            data = load_devices()
+        except Exception:
+            return [MenuItem("（读取设备列表失败）", None, enabled=False)]
+        items = []
+        for dev in data["items"][:10]:
+            label = dev.get("name") or dev["device"]
+            active = dev["id"] == data["active"]
+            items.append(MenuItem(
+                label,
+                lambda icon, item, dev_id=dev["id"]: switch_to(icon, dev_id),
+                radio=True,
+                checked=lambda item, dev_id=dev["id"]: load_devices()["active"] == dev_id,
+            ))
+        items.append(Menu.SEPARATOR)
+        items.append(MenuItem("添加 / 管理设备…", lambda icon, item: webbrowser.open(config.url + "/?manage=1")))
+        return items
+
     menu = Menu(
         MenuItem("打开管理后台", open_dash, default=True),
+        MenuItem("设备", Menu(*device_items())),
         MenuItem("复制访问地址", do_copy),
         Menu.SEPARATOR,
         MenuItem("重启服务", do_restart),

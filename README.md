@@ -3,7 +3,7 @@
 > 仓库：<https://github.com/knownothing20/tv-remote> · 最新版见 [Releases](https://github.com/knownothing20/tv-remote/releases)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-1.1.0-blue)
+![Version](https://img.shields.io/badge/version-1.2.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3.11)
 
@@ -104,7 +104,7 @@ local/
 
 | 字段 | 说明 |
 |---|---|
-| `device` | 电视 ADB 地址，`IP:端口` |
+| `device` | 当前设备的 ADB 地址，`IP:端口`（多设备见 `local/devices.json`） |
 | `host` | 监听地址；`127.0.0.1` 仅本机，`0.0.0.0` 允许局域网访问 |
 | `port` | Web 面板端口，默认 `8777` |
 | `adb` | adb 可执行文件路径，留空则自动在 `PATH` / `ANDROID_HOME` / 常见目录里找 |
@@ -163,6 +163,7 @@ tv-remote/
 |---|---|---|
 | GET | `/` | 面板页面 |
 | GET | `/api/ping` | 轻量心跳：`{"server":true,"tv":true}`（托盘图标用它） |
+| GET / POST | `/api/devices` | 设备列表 / 切换 / 新增 / 删除 |
 | GET / POST | `/api/settings` | 读取 / 修改界面设置（`mask_sensitive`、`refresh_seconds`） |
 | GET | `/api/status` | 全量状态 JSON（硬件、内存、存储、网络、进程、服务、自启动…） |
 | GET | `/api/screen` | MJPEG 实时画面（单路，多路会返回 429） |
@@ -195,8 +196,8 @@ powershell -ExecutionPolicy Bypass -File scripts/build.ps1
 
 | 版本 | 主题 |
 |---|---|
-| v1.1.0 | **局域网访问 + Docker ✔ 已发布** |
-| v1.2.0 | 多设备管理（`local/devices.json` + 面板切换） |
+| v1.1.0 | 局域网访问 + Docker ✔ |
+| v1.2.0 | **多设备管理 ✔ 已发布** |
 | v1.3.0 | 应用管理（卸载 / 停用 / 清数据 / 自启动开关） |
 | v1.4.0 | 更新检查（只提示，不自动下载） |
 | v1.5.0 | 面板体验（PWA / 主题切换 / 趋势图表） |

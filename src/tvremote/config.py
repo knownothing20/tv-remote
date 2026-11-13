@@ -63,6 +63,92 @@ def settings_path() -> str:
     return os.path.join(local_dir(), "settings.json")
 
 
+def devices_path() -> str:
+    return os.path.join(local_dir(), "devices.json")
+
+
+def _device_stub(cfg: "Config") -> dict:
+    return {"id": "default", "name": "默认设备", "device": cfg.device, "adb": cfg.adb or ""}
+
+
+def load_devices() -> dict:
+    """返回 {"active": id, "items": [...]}；首次调用会用 config.device 生成默认项。"""
+    raw = _read_json(devices_path())
+    items = [i for i in (raw.get("items") or []) if isinstance(i, dict) and i.get("device")]
+    active = raw.get("active") or ""
+
+    if not items:
+        items = [_device_stub(load_config())]
+        active = items[0]["id"]
+        save_devices({"active": active, "items": items})
+    elif len(items) == 1 and items[0].get("id") == "default":
+        # 只有一个默认项时，跟随 config.json 的改动
+        cur = load_config()
+        items[0]["device"] = cur.device
+        items[0]["adb"] = cur.adb or ""
+
+    if not active or all(i.get("id") != active for i in items):
+        active = items[0]["id"]
+    return {"active": active, "items": items}
+
+
+def save_devices(data: dict) -> str:
+    path = devices_path()
+    _write_json(path, data)
+    return path
+
+
+def active_device() -> dict:
+    data = load_devices()
+    for item in data["items"]:
+        if item.get("id") == data["active"]:
+            return item
+    return data["items"][0]
+
+
+def set_active_device(device_id: str) -> dict | None:
+    """切换当前设备，并同步写回 config.json 的 device 字段。"""
+    data = load_devices()
+    target = next((i for i in data["items"] if i.get("id") == device_id), None)
+    if not target:
+        return None
+    data["active"] = device_id
+    save_devices(data)
+
+    cfg = load_config()
+    cfg.device = target["device"]
+    cfg.adb = target.get("adb") or ""
+    save_config(cfg)
+    return target
+
+
+def upsert_device(device_id: str | None, name: str, device: str, adb: str = "") -> dict:
+    data = load_devices()
+    if not device_id:
+        device_id = "d" + str(int(__import__("time").time() * 1000) % 1000000)
+    item = {"id": device_id, "name": name or device, "device": device, "adb": adb or ""}
+    for idx, old in enumerate(data["items"]):
+        if old.get("id") == device_id:
+            data["items"][idx] = item
+            break
+    else:
+        data["items"].append(item)
+    save_devices(data)
+    return item
+
+
+def remove_device(device_id: str) -> dict:
+    data = load_devices()
+    data["items"] = [i for i in data["items"] if i.get("id") != device_id]
+    if not data["items"]:
+        data["items"] = [_device_stub(load_config())]
+    if all(i.get("id") != data.get("active") for i in data["items"]):
+        data["active"] = data["items"][0]["id"]
+        set_active_device(data["active"])
+    save_devices(data)
+    return data
+
+
 def resource_path(rel: str) -> str:
     """打包后资源在 _MEIPASS，源码运行时在包目录。"""
     base = getattr(sys, "_MEIPASS", None)

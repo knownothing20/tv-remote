@@ -15,10 +15,14 @@ from .adb import Adb
 from .config import (
     Config,
     load_config,
+    load_devices,
     load_settings,
+    remove_device,
     resource_path,
+    set_active_device,
     shots_dir,
     update_settings,
+    upsert_device,
 )
 
 _cfg: Config | None = None
@@ -49,6 +53,62 @@ def adb() -> Adb:
     if _adb is None:
         init()
     return _adb  # type: ignore[return-value]
+
+
+def set_device(device: str, adb_path: str = "") -> None:
+    """运行时切换目标设备（面板/托盘切换时调用）。"""
+    global _adb
+    c = cfg()
+    c.device = device
+    if adb_path:
+        c.adb = adb_path
+    _adb = Adb(device, c.adb)
+    _cache.clear()
+    _ping["t"], _ping["v"] = 0.0, False
+
+
+def devices_payload() -> dict:
+    """设备列表（按隐私设置决定是否打码地址）。"""
+    data = load_devices()
+    mask = load_settings().mask_sensitive
+    items = []
+    for item in data["items"]:
+        items.append({
+            "id": item["id"],
+            "name": item.get("name") or item["device"],
+            "device": privacy.mask_device(item["device"]) if mask else item["device"],
+            "device_raw": "" if mask else item["device"],
+        })
+    return {"active": data["active"], "items": items, "masked": mask}
+
+
+def handle_device_action(body: dict) -> dict:
+    action = (body.get("action") or "").strip()
+    if action == "select":
+        target = set_active_device(body.get("id", ""))
+        if not target:
+            return {"ok": False, "msg": "设备不存在"}
+        set_device(target["device"], target.get("adb") or "")
+        return {"ok": True, "msg": "已切换", "devices": devices_payload()}
+    if action in ("add", "update"):
+        device = (body.get("device") or "").strip()
+        if not device:
+            return {"ok": False, "msg": "请填写设备地址"}
+        item = upsert_device(body.get("id") or None, body.get("name") or "", device,
+                             body.get("adb") or "")
+        if action == "add" and not body.get("id"):
+            set_active_device(item["id"])
+            set_device(item["device"], item.get("adb") or "")
+        return {"ok": True, "msg": "已保存", "devices": devices_payload()}
+    if action == "remove":
+        remove_device(body.get("id", ""))
+        cur = cfg()
+        from .config import active_device
+
+        act = active_device()
+        set_device(act["device"], act.get("adb") or "")
+        return {"ok": True, "msg": "已删除", "devices": devices_payload()}
+    return {"ok": False, "msg": "未知操作"}
 
 
 def sh(cmd: str, timeout: int = 20) -> str:
@@ -372,6 +432,8 @@ class Handler(BaseHTTPRequestHandler):
             except Exception:
                 online = False
             self._send(200, json.dumps({"server": True, "tv": online}))
+        elif path == "/api/devices":
+            self._send(200, json.dumps(devices_payload(), ensure_ascii=False))
         elif path == "/api/settings":
             s = load_settings()
             self._send(200, json.dumps({
@@ -393,6 +455,10 @@ class Handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(n) or b"{}")
         except Exception:
             body = {}
+
+        if path == "/api/devices":
+            self._send(200, json.dumps(handle_device_action(body), ensure_ascii=False))
+            return
 
         if path == "/api/settings":
             s = update_settings(

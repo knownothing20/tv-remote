@@ -3,6 +3,18 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.2.0] - 2026-11-13
+
+多设备管理。
+
+### Added
+
+- `local/devices.json`：多台电视的名称 / 地址 / adb 路径，支持增删改
+- 面板顶部设备下拉框 + 「设备」管理弹窗（新增 / 切换 / 删除）
+- 托盘「设备」二级菜单：单选项切换，切换即时生效
+- `GET/POST /api/devices`：`select` / `add` / `update` / `remove`
+- 切换设备会同步写入 `local/config.json`，并热重建 ADB 客户端、清空缓存
+
 ## [1.1.0] - 2026-11-13
 
 局域网访问与容器化部署。
