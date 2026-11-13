@@ -1,7 +1,7 @@
 # 一键更新到 GitHub 最新 Release
 # 用法：双击 Update-Latest.cmd，或在 PowerShell 里运行本脚本
 $ErrorActionPreference = "Stop"
-$Root = $PSScriptRoot
+$Root = Split-Path -Parent $PSScriptRoot   # 脚本在 scripts\ 下，工程根目录是上一级
 $Exe = Join-Path $Root "TrayTVAdmin.exe"
 $Repo = "knownothing20/tv-remote"
 

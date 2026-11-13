@@ -92,6 +92,38 @@ def copy_clip(text: str) -> bool:
         return False
 
 
+def device_menu_items(switch_to, open_panel):
+    """构建设备子菜单。
+
+    注意：pystray 的 MenuItem 回调只接受 0~2 个位置参数，
+    因此每项都通过闭包工厂生成（不能写成带默认值的第三个参数）。
+    供托盘与自检共用，便于自检捕获回调签名错误。
+    """
+    from pystray import Menu, MenuItem
+
+    try:
+        data = load_devices()
+    except Exception:
+        return [MenuItem("（读取设备列表失败）", None, enabled=False)]
+
+    def make(dev):
+        dev_id = dev["id"]
+        label = dev.get("name") or dev["device"]
+
+        def handler(icon, item):
+            switch_to(icon, dev_id)
+
+        def is_checked(item):
+            return load_devices()["active"] == dev_id
+
+        return MenuItem(label, handler, radio=True, checked=is_checked)
+
+    items = [make(dev) for dev in data["items"][:10]]
+    items.append(Menu.SEPARATOR)
+    items.append(MenuItem("添加 / 管理设备…", lambda icon, item: open_panel()))
+    return items
+
+
 def run_tray(config: Config):
     import pystray
     from pystray import Menu, MenuItem
@@ -124,28 +156,10 @@ def run_tray(config: Config):
             icon.update_menu()
             icon.notify(f"已切换到 {target.get('name') or target['device']}")
 
-    def device_items():
-        try:
-            data = load_devices()
-        except Exception:
-            return [MenuItem("（读取设备列表失败）", None, enabled=False)]
-        items = []
-        for dev in data["items"][:10]:
-            label = dev.get("name") or dev["device"]
-            active = dev["id"] == data["active"]
-            items.append(MenuItem(
-                label,
-                lambda icon, item, dev_id=dev["id"]: switch_to(icon, dev_id),
-                radio=True,
-                checked=lambda item, dev_id=dev["id"]: load_devices()["active"] == dev_id,
-            ))
-        items.append(Menu.SEPARATOR)
-        items.append(MenuItem("添加 / 管理设备…", lambda icon, item: webbrowser.open(config.url + "/?manage=1")))
-        return items
-
     menu = Menu(
         MenuItem("打开管理后台", open_dash, default=True),
-        MenuItem("设备", Menu(*device_items())),
+        MenuItem("设备", Menu(*device_menu_items(
+            switch_to, lambda: webbrowser.open(config.url + "/?manage=1")))),
         MenuItem("复制访问地址", do_copy),
         Menu.SEPARATOR,
         MenuItem("重启服务", do_restart),
@@ -186,6 +200,10 @@ def selftest(config: Config) -> dict:
         result["tray_backend_ok"] = True
         result["tray_backend"] = type(probe).__module__
         del probe
+
+        # 真实菜单（含设备子菜单）也要能构建，避免回调签名类错误漏检
+        probe_menu = Menu(*device_menu_items(lambda icon, dev_id: None, lambda: None))
+        result["tray_menu_ok"] = probe_menu is not None
     except Exception as e:  # noqa: BLE001
         result["tray_backend_ok"] = False
         result["tray_error"] = repr(e)

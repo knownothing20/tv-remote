@@ -3,6 +3,19 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.5.4] - 2026-11-13
+
+### Fixed
+
+- **托盘启动即崩溃**：设备子菜单的回调用了带默认值的第三个参数，pystray 的
+  `_assert_action` 抛 `ValueError`，双击 exe / 快捷方式会弹
+  「Unhandled exception in script」。已改为闭包工厂生成 0~2 参数回调。
+- `--selftest` 新增 `tray_menu_ok`：真实构建含设备子菜单的菜单，覆盖此类签名错误。
+
+### Changed
+
+- `Update-Latest.ps1` 移入 `scripts/`，根目录只保留 `Update-Latest.cmd` 入口
+
 ## [1.5.3] - 2026-11-13
 
 ### Fixed
