@@ -3,7 +3,7 @@
 > 仓库：<https://github.com/knownothing20/tv-remote> · 最新版见 [Releases](https://github.com/knownothing20/tv-remote/releases)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-1.5.6-blue)
+![Version](https://img.shields.io/badge/version-1.5.7-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3.11)
 
@@ -26,6 +26,7 @@
 | 快捷操作 | 打开指定投屏 App、回桌面、返回键、加省电白名单、保存截图 |
 | 应用管理 | 应用列表 / 搜索、打开 / 停止 / 停用 / 清数据 / 卸载（含保护名单） |
 | PWA | 可添加到主屏；浅色/深色主题；内存趋势曲线 |
+| 守护 | 电视在线但投屏接收端未运行时自动拉起（可关） |
 | 托盘 | 右键菜单：打开面板 / 复制地址 / 重启服务 / 退出（退出即停服务） |
 
 ## 快速开始

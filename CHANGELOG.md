@@ -3,6 +3,15 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.5.7] - 2026-11-13
+
+### Added
+
+- **投屏接收端守护**：设置项 `auto_launch_receiver`（面板「设备」弹窗内开关）。
+  开启后，只要电视在线而 CastBay 未运行，服务会自动拉起它（60 秒节流，避免与手动关闭打架）。
+  背景：CastBay 没有后台服务组件，Android 11 又限制开机广播拉起界面，电视重启后不保证自启。
+- `serve()` 增加看门狗线程：headless / Docker 模式无人访问面板时也会持续心跳与守护。
+
 ## [1.5.6] - 2026-11-13
 
 ### Changed

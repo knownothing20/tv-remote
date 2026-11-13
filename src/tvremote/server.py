@@ -454,6 +454,32 @@ def get_whitelist() -> list:
 
 
 _ping = {"t": 0.0, "v": False}
+_online_state = {"last": None}
+_launch_guard = {"t": 0.0}
+RECEIVER_PKG = "com.weenas.castbay"
+
+
+def _maybe_launch_receiver() -> None:
+    """按设置确保投屏接收端在运行（CastBay 无后台服务，重启后可能不自启/会被杀）。"""
+    now = time.time()
+    if now - _launch_guard["t"] < 60:      # 最多每分钟尝试一次，避免与用户手动关闭打架
+        return
+    try:
+        if not load_settings().auto_launch_receiver:
+            return
+        if sh(f"pidof {RECEIVER_PKG}", timeout=6):
+            return
+    except Exception:
+        return
+    _launch_guard["t"] = now
+
+    def _go():
+        try:
+            sh(f"monkey -p {RECEIVER_PKG} 1", timeout=20)
+        except Exception:
+            pass
+
+    threading.Thread(target=_go, daemon=True).start()
 
 
 def tv_online() -> bool:
@@ -463,6 +489,9 @@ def tv_online() -> bool:
     out, _err, _rc = adb().run(["shell", "echo ok"], timeout=3)
     ok = b"ok" in out
     _ping["t"], _ping["v"] = now, ok
+    if ok:
+        _maybe_launch_receiver()
+    _online_state["last"] = ok
     return ok
 
 
@@ -636,6 +665,7 @@ class Handler(BaseHTTPRequestHandler):
                 "mask_sensitive": s.mask_sensitive,
                 "refresh_seconds": s.refresh_seconds,
                 "check_updates": s.check_updates,
+                "auto_launch_receiver": s.auto_launch_receiver,
             }, ensure_ascii=False))
         elif path == "/api/screen":
             self.stream_screen()
@@ -667,6 +697,7 @@ class Handler(BaseHTTPRequestHandler):
                 mask_sensitive=body.get("mask_sensitive"),
                 refresh_seconds=body.get("refresh_seconds"),
                 check_updates=body.get("check_updates"),
+                auto_launch_receiver=body.get("auto_launch_receiver"),
             )
             with _cache_lock:
                 _cache.pop("update", None)
@@ -675,6 +706,7 @@ class Handler(BaseHTTPRequestHandler):
                 "mask_sensitive": s.mask_sensitive,
                 "refresh_seconds": s.refresh_seconds,
                 "check_updates": s.check_updates,
+                "auto_launch_receiver": s.auto_launch_receiver,
             }, ensure_ascii=False))
             return
 
@@ -720,4 +752,15 @@ def make_server(port: int | None = None, host: str | None = None) -> ThreadingHT
 
 
 def serve(port: int | None = None, host: str | None = None):
+    interval = max(3, int(cfg().poll_seconds))
+
+    def _watchdog():
+        while True:
+            try:
+                tv_online()
+            except Exception:
+                pass
+            time.sleep(interval)
+
+    threading.Thread(target=_watchdog, daemon=True).start()
     make_server(port, host).serve_forever()
