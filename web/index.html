@@ -8,8 +8,9 @@
 <meta name="theme-color" content="#0b0f14">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <style>
-:root{
-  --bg:#0b0f14; --card:#121820; --card2:#0e141b; --line:#1e2732; --line2:#141c25;
+/* 界面资源外置，可直接修改；图形均为轻量内联 SVG。 */
+svg:not([aria-hidden="true"]){fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+:root{ --card:#121820; --card2:#0e141b; --line:#1e2732; --line2:#141c25;
   --txt:#e6edf3; --dim:#8b98a9; --dim2:#5f6b7a;
   --acc:#58a6ff; --acc2:#1f6feb; --ok:#3fb950; --warn:#d29922; --bad:#f85149;
   --btn:#1a222c; --btnline:#26313d; --hover:#212b36;
@@ -167,68 +168,168 @@ main{max-width:1400px;margin:0 auto;padding:18px 20px 48px}
   .kpis{grid-template-columns:repeat(2,1fr)}
   .grid{grid-template-columns:1fr}
 }
-@media (max-width:560px){
-  body{overflow-x:hidden}
-  main{padding:14px 12px 40px}
-  #proc li,#svc li,#boot li,#wl li{grid-template-columns:minmax(0,1fr) auto}
-  #proc li .pkg,#svc li .pkg,#boot li .pkg,#wl li .pkg{grid-column:1 / -1;white-space:normal;word-break:break-all}
-  #proc li .val{align-self:start}
-  .tagcol{justify-content:flex-end}
-  .list.apps li{grid-template-columns:minmax(0,1fr) auto}
-  .list.apps li .pkg{grid-column:1 / -1}
-  .list.apps li .val{display:none}
-  .row-acts{grid-column:1 / -1;justify-content:flex-end}
-  .topbar{padding:10px 12px}
-  .kpis{grid-template-columns:1fr 1fr;gap:9px}
-  .kpi strong{font-size:17px}
-  .list.apps .name{max-width:100%}
-  .addrow{grid-template-columns:1fr}
+/* ---------- 控制台视觉层 ---------- */
+:root{
+  --bg:#0c1213;--card:#141c1d;--card2:#101718;--line:#263334;--line2:#1d292a;
+  --txt:#e8efed;--dim:#93a5a2;--dim2:#748985;--acc:#65c3ae;--acc2:#2d927b;
+  --ok:#6dcda0;--warn:#d7ac68;--bad:#e58780;--btn:#1d2829;--btnline:#304041;
+  --hover:#273536;--soft:rgba(101,195,174,.09);--shadow:0 12px 32px -24px rgba(0,0,0,.65);
+  --radius:16px;color-scheme:dark;
 }
+html[data-theme="light"]{
+  --bg:#f1f5f3;--card:#fff;--card2:#f6f9f8;--line:#dfe8e4;--line2:#e9efec;
+  --txt:#20332f;--dim:#617671;--dim2:#758984;--acc:#227d68;--acc2:#227d68;
+  --ok:#217651;--warn:#94691c;--bad:#be4b45;--btn:#f0f5f3;--btnline:#d6e2dd;
+  --hover:#e5efeb;--soft:rgba(34,125,104,.07);--shadow:0 12px 28px -24px rgba(34,64,54,.3);
+  color-scheme:light;
+}
+html{scroll-padding-top:84px}
+body{min-width:320px;font-size:13px;letter-spacing:.01em}
+::selection{background:var(--acc);color:var(--bg)}
+.topbar{gap:18px;min-height:74px;padding:13px 28px;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(18px);border-bottom-color:var(--line2)}
+.brand{gap:12px}.logo{width:38px;height:38px;border-radius:12px;background:var(--soft);color:var(--acc);border:1px solid color-mix(in srgb,var(--acc) 25%,transparent)}
+.logo svg{width:22px;height:22px}
+h1{font-size:15px;letter-spacing:.02em}.brand p{font-size:11px;margin-top:1px}.brand p span+span:before{content:"·";margin-right:6px}
+.tools{gap:9px}.tools .select{max-width:170px;padding:6px 26px 6px 10px;font-size:12px}
+button,.select,.input{min-height:34px;border-radius:9px;font-size:12px;transition:background .16s,border-color .16s,color .16s,transform .16s}
+button:focus-visible,.select:focus-visible,.input:focus-visible,a:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+button:active:not(:disabled){transform:translateY(1px)}
+button.icon{width:34px;padding:6px;display:inline-grid;place-items:center}
+button.primary{background:var(--acc);border-color:var(--acc);color:#102b25;font-weight:600}
+button.primary:hover{filter:brightness(1.07);border-color:var(--acc)}
+button svg,.btn-label svg{width:16px;height:16px;flex:0 0 auto}
+.btn-label{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;font-size:11px;border:0;background:var(--btn);color:var(--dim)}
+.badge:before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.badge.on{color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent)}
+.badge.off{color:var(--dim);background:var(--btn)}
+.badge.busy{color:var(--warn)}
+.chip{display:inline-flex;align-items:center;justify-content:center;min-height:22px;font-size:10px;padding:2px 7px;line-height:1.4}
+#adp{max-width:220px;overflow:hidden;text-overflow:ellipsis;background:transparent;border-color:transparent}
+main{max-width:1480px;padding:24px 28px 48px}
+.kpis{gap:14px;margin-bottom:18px}.grid{gap:18px;grid-template-columns:minmax(0,7fr) minmax(340px,5fr)}.col{gap:18px}
+.card,.kpi{position:relative;border-radius:var(--radius);box-shadow:var(--shadow)}
+.card{padding:18px 20px}.card-hd{gap:10px;margin-bottom:16px;min-height:26px}.card-hd h2{display:flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.02em}
+.hd-icon{display:inline-flex;color:var(--dim)}.hd-icon svg{width:16px;height:16px}
+.kpi{display:grid;grid-template-columns:1fr auto;padding:17px 18px 15px;overflow:hidden;min-height:114px}
+.kpi-top{grid-column:1 / -1;display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.kpi-label{font-size:11px;margin:0}.kpi-icon{display:grid;place-items:center;width:27px;height:27px;border-radius:8px;background:var(--soft);color:var(--acc)}
+.kpi-icon svg{width:15px;height:15px}.kpi strong{font-size:25px;line-height:1.2;font-weight:550;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
+.kpi-sub{font-size:10.5px;margin-top:5px;color:var(--dim)}.kpi .bar{height:3px;margin-top:11px;grid-column:1 / -1;background:var(--btn)}
+.kpi .bar i{background:var(--acc)}
+.screen{border:1px solid var(--line2);border-radius:11px;background:var(--card2);aspect-ratio:16/9}
+.screen img{width:100%;height:100%;object-fit:contain}
+.actions{gap:9px;margin-top:14px}.actions button{display:inline-flex;align-items:center;gap:6px;background:transparent;border-color:var(--line);padding:7px 11px}
+.actions button[data-act="castbay"]{background:var(--soft);color:var(--acc);border-color:color-mix(in srgb,var(--acc) 25%,transparent)}
+.filter{padding:4px;background:var(--card2);border:1px solid var(--line2);border-radius:11px;margin:0 0 10px;gap:4px}
+.filter .input{background:transparent;border:0;padding:6px 9px;min-height:32px}.filter .select{background:transparent;border:0;border-left:1px solid var(--line);border-radius:0;padding-left:12px}
+.list{max-height:376px;scrollbar-gutter:stable}
+.list li{padding:10px 4px;gap:12px;border-radius:7px;transition:background .15s}
+.list li:hover{background:var(--card2)}
+.list .name{font-size:12px}.list .pkg{font-size:10.5px;letter-spacing:0}.list .val{font-size:10.5px}
+.tagcol .chip{min-width:42px}.row-acts{gap:4px}.row-acts button{padding:4px 7px;background:transparent;border-color:transparent;color:var(--dim);font-size:10.5px}
+.row-acts button:hover{color:var(--acc);background:var(--soft);border-color:transparent}
+.row-acts button.danger{color:var(--dim2);border-style:solid;margin-left:6px;border-left-color:var(--line);border-radius:0 7px 7px 0}
+.row-acts button.danger:hover{color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,transparent)}
+.list.apps li{grid-template-columns:minmax(100px,1fr) minmax(90px,1.1fr) 52px auto}
+.tabs{gap:3px;padding:4px;border-radius:10px;background:var(--card2);border-color:var(--line2);width:100%}
+.tab{flex:1;padding:5px 8px;font-size:11px}.tab.active{background:var(--btn);color:var(--acc);box-shadow:none}
+.tab .dim{margin-left:3px;font-size:10px}.kv{font-size:11.5px;gap:7px 14px}.kv dd{font-size:11px}.kv+.kv{margin-top:14px;padding-top:14px}
+#spark{height:70px}
+.modal{background:rgba(5,10,10,.66);backdrop-filter:blur(5px);padding:20px}
+.sheet{width:min(570px,100%);border-radius:18px;padding:22px 24px;box-shadow:0 30px 80px -25px rgba(0,0,0,.5)}
+.sheet-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px}.sheet-head h3{margin:0;font-size:16px}.sheet-head p{margin:3px 0 0;font-size:11px}.sheet-head .icon{margin-left:auto}
+.section-label{font-size:10px;color:var(--dim);margin:16px 0 6px;font-weight:500}
+.devit{gap:10px;padding:11px 0}.devit .nm{font-size:12px}.devit .ad{display:block;font-size:10px}.devit button{font-size:10.5px}
+.addrow{gap:7px;margin:10px 0 6px}.addrow .input{font-size:11px}.settings{border-top-color:var(--line2);gap:3px;margin-top:18px;padding-top:8px}
+.sw{padding:8px 0;font-size:11.5px;gap:10px}.sw input{width:15px;height:15px;margin:0;accent-color:var(--acc)}
+.sheet-ft{margin-top:16px;padding-top:14px;border-top:1px solid var(--line2)}
+.toast{bottom:28px;padding:10px 18px;font-size:12px;border-radius:12px;max-width:calc(100vw - 32px);white-space:normal;text-align:center}
+.banner{max-width:1424px;margin:16px auto -6px;font-size:11px}
+@media(max-width:1180px){.kpis{grid-template-columns:repeat(4,1fr)}.grid{grid-template-columns:1fr}.list.apps li{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 64px auto}}
+@media(max-width:760px){
+ .topbar{gap:12px;padding:12px 18px}.brand{width:100%}.tools{width:100%;justify-content:flex-end}.tools #adp{margin-right:auto}
+ main{padding:18px}.kpis{grid-template-columns:1fr 1fr;gap:12px}.card{padding:16px}.grid,.col{gap:14px}
+ .list.apps li{grid-template-columns:minmax(0,1fr) 58px auto}.list.apps li .pkg{grid-column:1 / -1;grid-row:2}.list.apps li .val{grid-column:2;grid-row:1}.list.apps .row-acts{grid-column:3;grid-row:1}
+}
+@media(max-width:560px){
+ body{overflow-x:hidden}.topbar{padding:12px;min-height:0}.tools{gap:6px}.tools #adp{max-width:135px}.tools .select{max-width:126px;min-height:32px;font-size:11px}
+ .tools button{min-height:32px}.tools button.icon{width:32px}.brand p{font-size:10px}
+ main{padding:14px 12px 36px}.kpis{gap:9px;margin-bottom:14px}.kpi{padding:13px 12px;min-height:106px}.kpi strong{font-size:21px}.kpi-sub{font-size:9.5px}.kpi-icon{width:24px;height:24px}
+ .card{padding:14px}.card-hd{margin-bottom:12px}.actions{gap:7px}.actions button{font-size:11px;padding:6px 9px}.actions svg{width:14px;height:14px}
+ #proc li,#svc li,#boot li,#wl li{grid-template-columns:minmax(0,1fr) auto}
+ #proc li .pkg,#svc li .pkg,#boot li .pkg,#wl li .pkg{grid-column:1 / -1;white-space:normal;word-break:break-all}
+ #proc li .val{align-self:start}.tagcol{justify-content:flex-end}
+ .list.apps li{grid-template-columns:minmax(0,1fr) auto;padding:10px 3px}.list.apps li .name{grid-column:1;grid-row:1}.list.apps li .pkg{grid-column:1 / -1;grid-row:2}.list.apps li .val{display:none}
+ .list.apps li .row-acts{grid-column:2;grid-row:1}.row-acts button{font-size:10px;padding:4px 5px}.row-acts{gap:1px}
+ .sheet{padding:18px}.addrow{grid-template-columns:1fr}.modal{padding:12px}.banner{margin:12px 12px -2px}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important}}
 </style>
 </head>
 <body>
+<svg aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">
+  <defs>
+    <symbol id="i-tv" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="m8 2 4 4 4-4M8 23h8"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2 6M20 4v7h-7"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="m9 3-.6 2.2-2 .9-2.2-.4-2 3.5 1.6 1.6v2.3l-1.6 1.6 2 3.5 2.2-.4 2 .9L9 21h6l.6-2.2 2-.9 2.2.4 2-3.5-1.6-1.6v-2.3l1.6-1.6-2-3.5-2.2.4-2-.9L15 3Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-theme" viewBox="0 0 24 24"><path d="M20.5 14.1A8.6 8.6 0 0 1 9.9 3.5 8.7 8.7 0 1 0 20.5 14.1Z"/></symbol>
+    <symbol id="i-memory" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9" y="9" width="6" height="6" rx="1"/><path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4"/></symbol>
+    <symbol id="i-storage" viewBox="0 0 24 24"><path d="M21 12H3m18 0-3 8H6l-3-8m18 0-3-8H6l-3 8m7 4h4"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-cast" viewBox="0 0 24 24"><path d="M3 18a3 3 0 0 1 3 3m-3-7a7 7 0 0 1 7 7M3 6v3h18v12h-9M3 6h18v3"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7M5 9v11h14V9M9 20v-6h6v6"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="m9 5-7 7 7 7M2 12h13a6 6 0 0 1 6 6v1"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6Z"/><path d="m8 12 3 3 5-5"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M8 5 6 8H3v12h18V8h-3l-2-3Z"/><circle cx="12" cy="13" r="3"/></symbol>
+    <symbol id="i-apps" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-network" viewBox="0 0 24 24"><circle cx="12" cy="18" r="1"/><path d="M5 12.5a10 10 0 0 1 14 0M2 9a15 15 0 0 1 20 0M8.5 16a5 5 0 0 1 7 0"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18M7 15l4-5 4 3 5-7"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+  </defs>
+</svg>
 
 <header class="topbar">
   <div class="brand">
-    <div class="logo">TV</div>
+    <div class="logo"><svg><use href="#i-tv"/></svg></div>
     <div>
       <h1>电视管理后台</h1>
-      <p><span id="devName">未连接</span> · <span id="ver">v—</span></p>
+      <p><span id="devName">未连接</span><span id="ver">v—</span></p>
     </div>
   </div>
   <div class="tools">
-    <span id="online" class="badge off">离线</span>
+    <span id="online" class="badge off" role="status" aria-live="polite">离线</span>
     <span id="adp" class="chip">适配器 —</span>
-    <select id="devsel" class="select" title="切换设备"></select>
-    <button id="btnManage" class="icon" title="设备与设置">⚙</button>
-    <button id="btnTheme" class="icon" title="切换浅色 / 深色">◐</button>
-    <button id="btnRefresh" class="primary">刷新</button>
+    <select id="devsel" class="select" title="切换设备" aria-label="切换设备"></select>
+    <button id="btnManage" class="icon" title="设备与设置" aria-label="设备与设置"><svg><use href="#i-settings"/></svg></button>
+    <button id="btnTheme" class="icon" title="切换浅色 / 深色" aria-label="切换浅色 / 深色"><svg><use href="#i-theme"/></svg></button>
+    <button id="btnRefresh" class="primary"><span class="btn-label"><svg><use href="#i-refresh"/></svg>刷新</span></button>
   </div>
 </header>
 
 <div id="updBanner" class="banner" hidden></div>
 
 <main>
-  <section class="kpis">
+  <section class="kpis" aria-label="设备概览">
     <div class="kpi">
-      <span class="kpi-label">内存占用</span>
+      <div class="kpi-top"><span class="kpi-label">内存占用</span><span class="kpi-icon"><svg><use href="#i-memory"/></svg></span></div>
       <strong id="kpiMem">—</strong>
-      <div class="bar"><i id="kpiMemBar"></i></div>
       <span class="kpi-sub" id="kpiMemSub">—</span>
+      <div class="bar"><i id="kpiMemBar"></i></div>
     </div>
     <div class="kpi">
-      <span class="kpi-label">存储</span>
+      <div class="kpi-top"><span class="kpi-label">存储空间</span><span class="kpi-icon"><svg><use href="#i-storage"/></svg></span></div>
       <strong id="kpiStore">—</strong>
-      <div class="bar"><i id="kpiStoreBar"></i></div>
       <span class="kpi-sub" id="kpiStoreSub">—</span>
+      <div class="bar"><i id="kpiStoreBar"></i></div>
     </div>
     <div class="kpi">
-      <span class="kpi-label">运行时长</span>
+      <div class="kpi-top"><span class="kpi-label">运行时长</span><span class="kpi-icon"><svg><use href="#i-clock"/></svg></span></div>
       <strong id="kpiUp">—</strong>
       <span class="kpi-sub">自上次开机</span>
     </div>
     <div class="kpi">
-      <span class="kpi-label">投屏接收端</span>
+      <div class="kpi-top"><span class="kpi-label">投屏接收端</span><span class="kpi-icon"><svg><use href="#i-cast"/></svg></span></div>
       <strong id="kpiCast">—</strong>
       <span class="kpi-sub" id="kpiCastSub">—</span>
     </div>
@@ -238,25 +339,25 @@ main{max-width:1400px;margin:0 auto;padding:18px 20px 48px}
     <section class="col">
       <article class="card">
         <header class="card-hd">
-          <h2>实时画面</h2>
+          <h2><span class="hd-icon"><svg><use href="#i-tv"/></svg></span>实时画面</h2>
           <span class="dim" id="screenHint">约 1 帧/秒</span>
         </header>
         <div class="screen"><img id="screen" alt="电视实时画面"></div>
         <div class="actions">
-          <button data-act="castbay">打开映湾</button>
-          <button data-act="home">回桌面</button>
-          <button data-act="back">返回键</button>
-          <button data-act="whitelist">加省电白名单</button>
-          <button data-act="screenshot">保存截图</button>
+          <button data-act="castbay"><svg><use href="#i-cast"/></svg>打开映湾</button>
+          <button data-act="home"><svg><use href="#i-home"/></svg>回桌面</button>
+          <button data-act="back"><svg><use href="#i-back"/></svg>返回键</button>
+          <button data-act="whitelist"><svg><use href="#i-shield"/></svg>加省电白名单</button>
+          <button data-act="screenshot"><svg><use href="#i-camera"/></svg>保存截图</button>
         </div>
       </article>
 
       <article class="card">
         <header class="card-hd">
-          <h2>应用管理 <span id="appCount" class="chip">—</span></h2>
+          <h2><span class="hd-icon"><svg><use href="#i-apps"/></svg></span>应用管理 <span id="appCount" class="chip">—</span></h2>
         </header>
         <div class="filter">
-          <input id="appQuery" class="input" placeholder="搜索包名 / 名称">
+          <input id="appQuery" class="input" aria-label="搜索应用" placeholder="搜索应用或包名">
           <select id="appScope" class="select">
             <option value="third">第三方</option>
             <option value="all">全部</option>
@@ -265,14 +366,14 @@ main{max-width:1400px;margin:0 auto;padding:18px 20px 48px}
         <ul id="appList" class="list apps"></ul>
       </article>
       <article class="card">
-        <header class="card-hd"><h2>内存趋势</h2><span class="dim">最近 3 分钟</span></header>
+        <header class="card-hd"><h2><span class="hd-icon"><svg><use href="#i-chart"/></svg></span>内存趋势</h2><span class="dim">最近 3 分钟</span></header>
         <canvas id="spark"></canvas>
       </article>
     </section>
 
     <aside class="col">
       <article class="card">
-        <header class="card-hd"><h2>设备与网络</h2></header>
+        <header class="card-hd"><h2><span class="hd-icon"><svg><use href="#i-network"/></svg></span>设备与网络</h2></header>
         <dl class="kv" id="deviceInfo"></dl>
         <dl class="kv" id="netInfo"></dl>
         <dl class="kv" id="fgInfo"></dl>
@@ -292,7 +393,7 @@ main{max-width:1400px;margin:0 auto;padding:18px 20px 48px}
       </article>
 
       <article class="card">
-        <header class="card-hd"><h2>省电白名单</h2><span id="wlN" class="dim"></span></header>
+        <header class="card-hd"><h2><span class="hd-icon"><svg><use href="#i-shield"/></svg></span>省电白名单</h2><span id="wlN" class="dim"></span></header>
         <ul id="wl" class="list"></ul>
       </article>
 
@@ -301,16 +402,22 @@ main{max-width:1400px;margin:0 auto;padding:18px 20px 48px}
 </main>
 
 <div id="modal" class="modal" hidden>
-  <div class="sheet">
-    <h3>设备与设置</h3>
-    <div id="devList"></div>
-    <div class="addrow">
-      <input class="input" id="devNameInput" placeholder="名称，如 客厅 TCL">
-      <input class="input" id="devAddrInput" placeholder="192.168.1.10:5555">
-      <button class="primary" id="btnAddDev">添加</button>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" tabindex="-1">
+    <div class="sheet-head">
+      <div><h3 id="settingsTitle">设备与设置</h3><p class="dim">管理连接设备与面板偏好</p></div>
+      <button id="btnCloseModal" class="icon" title="关闭设置" aria-label="关闭设置"><svg><use href="#i-close"/></svg></button>
     </div>
-    <p class="dim" style="margin:6px 0 0">保存在 <span class="mono">local/devices.json</span>，切换会同步写入 <span class="mono">local/config.json</span>。</p>
+    <div class="section-label">已保存的设备</div>
+    <div id="devList"></div>
+    <div class="section-label">添加设备</div>
+    <div class="addrow">
+      <input class="input" id="devNameInput" aria-label="设备名称" placeholder="名称，如 客厅 TCL">
+      <input class="input" id="devAddrInput" aria-label="设备 ADB 地址" placeholder="192.168.1.10:5555">
+      <button class="primary" id="btnAddDev">添加设备</button>
+    </div>
+    <p class="dim" style="margin:6px 0 0;font-size:10.5px">保存在 <span class="mono">local/devices.json</span>，切换会同步写入 <span class="mono">local/config.json</span>。</p>
 
+    <div class="section-label">面板与投屏</div>
     <div class="settings">
       <label class="sw"><input type="checkbox" id="setMask"> 隐藏敏感信息（IP / 序列号 / Wi-Fi 名）</label>
       <label class="sw"><input type="checkbox" id="setUpd"> 启动时检查 GitHub 新版本</label>
@@ -319,7 +426,7 @@ main{max-width:1400px;margin:0 auto;padding:18px 20px 48px}
       <label class="sw"><input type="checkbox" id="setCastFg"> 投屏时自动切到映湾前台（保证有画面）</label>
     </div>
 
-    <div class="sheet-ft"><button id="btnCloseModal">关闭</button></div>
+    <div class="sheet-ft"><button id="btnDoneModal" class="primary">完成</button></div>
   </div>
 </div>
 
@@ -423,6 +530,10 @@ function fmtTs(ts){
 }
 
 async function refresh(){
+  if (refresh.pending) return;
+  refresh.pending = true;
+  $('btnRefresh').disabled = true;
+  $('btnRefresh').setAttribute('aria-busy', 'true');
   try {
     const d = await api('/api/status');
     const online = !!d.online;
@@ -532,6 +643,10 @@ async function refresh(){
   } catch (e) {
     $('online').className = 'badge off';
     $('online').textContent = '连接失败';
+  } finally {
+    refresh.pending = false;
+    $('btnRefresh').disabled = false;
+    $('btnRefresh').removeAttribute('aria-busy');
   }
 }
 
@@ -551,6 +666,7 @@ function renderSpark(items){
   const style = getComputedStyle(document.documentElement);
   const line = style.getPropertyValue('--acc').trim() || '#58a6ff';
   const grid = style.getPropertyValue('--line').trim() || '#1e2732';
+  const muted = style.getPropertyValue('--dim').trim() || '#8b98a9';
   const vals = items.map(i => Number(i.mem) || 0);
   const lo = Math.min.apply(null, vals);
   const hi = Math.max.apply(null, vals);
@@ -576,7 +692,7 @@ function renderSpark(items){
   ctx.fillStyle = line;
   ctx.font = '11px sans-serif';
   ctx.fillText(vals[vals.length - 1] + '%', Math.max(2, w - 30), 12);
-  ctx.fillStyle = grid;
+  ctx.fillStyle = muted;
   ctx.fillText(lo + '–' + hi + '%', 2, 12);
 }
 
@@ -765,9 +881,36 @@ async function checkUpdate(){
 }
 
 /* 弹窗 */
-$('btnManage').onclick = () => { $('modal').hidden = false; loadDevices(); loadSettings(); };
-$('btnCloseModal').onclick = () => { $('modal').hidden = true; };
-$('modal').addEventListener('click', (ev) => { if (ev.target === $('modal')) $('modal').hidden = true; });
+let modalFocus = null;
+function openSettings(){
+  modalFocus = document.activeElement;
+  $('modal').hidden = false;
+  loadDevices(); loadSettings();
+  $('modal').querySelector('.sheet').focus();
+  document.body.style.overflow = 'hidden';
+}
+function closeSettings(){
+  $('modal').hidden = true;
+  document.body.style.overflow = '';
+  if (modalFocus && modalFocus.focus) modalFocus.focus();
+}
+$('btnManage').onclick = openSettings;
+$('btnCloseModal').onclick = closeSettings;
+$('btnDoneModal').onclick = closeSettings;
+$('modal').addEventListener('click', (ev) => { if (ev.target === $('modal')) closeSettings(); });
+document.addEventListener('keydown', (ev) => {
+  if ($('modal').hidden) return;
+  if (ev.key === 'Escape'){ closeSettings(); return; }
+  if (ev.key !== 'Tab') return;
+  const els = Array.from($('modal').querySelectorAll('button:not(:disabled),input,select,[tabindex="0"]'));
+  if (!els.length) return;
+  const first = els[0], last = els[els.length - 1];
+  if (ev.shiftKey && (document.activeElement === first || document.activeElement.classList.contains('sheet'))){
+    ev.preventDefault(); last.focus();
+  } else if (!ev.shiftKey && document.activeElement === last){
+    ev.preventDefault(); first.focus();
+  }
+});
 
 /* 启动 */
 $('btnRefresh').onclick = () => { refresh(); loadHistory(); loadAdapter(); };

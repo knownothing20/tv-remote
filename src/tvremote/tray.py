@@ -132,7 +132,7 @@ def device_menu_items(switch_to, open_panel):
 
     items = [make(dev) for dev in data["items"][:10]]
     items.append(Menu.SEPARATOR)
-    items.append(MenuItem("添加 / 管理设备…", lambda icon, item: open_panel()))
+    items.append(MenuItem("管理设备…", lambda icon, item: open_panel()))
     return items
 
 
@@ -197,17 +197,19 @@ def run_tray(config: Config):
 
     menu = Menu(
         MenuItem("打开管理后台", open_dash, default=True),
-        MenuItem("设备", Menu(*device_menu_items(
+        MenuItem("切换设备", Menu(*device_menu_items(
             switch_to, lambda: webbrowser.open(dashboard_url(config, "manage=1"))))),
-        MenuItem("复制访问地址", do_copy),
         Menu.SEPARATOR,
-        MenuItem("重启服务（面板）", do_restart),
-        MenuItem("重启程序（更新后生效）", do_relaunch),
+        MenuItem("复制面板链接", do_copy),
+        MenuItem("维护", Menu(
+            MenuItem("重启面板服务", do_restart),
+            MenuItem("重启托盘程序", do_relaunch),
+        )),
         Menu.SEPARATOR,
-        MenuItem("退出（关闭服务）", do_quit),
+        MenuItem("退出并停止服务", do_quit),
     )
 
-    icon = pystray.Icon("tvremote", off_img, "电视管理后台 · 检测中", menu)
+    icon = pystray.Icon("tvremote", off_img, "电视管理后台 · 正在连接", menu)
     interval = max(2, int(config.poll_seconds))
 
     def poll():
