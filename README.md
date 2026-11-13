@@ -1,5 +1,7 @@
 # tv-remote · 电视管理后台（Windows 托盘）
 
+> 仓库：<https://github.com/knownothing20/tv-remote> · 最新版见 [Releases](https://github.com/knownothing20/tv-remote/releases)
+
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4)
@@ -27,6 +29,8 @@
 ## 快速开始
 
 ### 方式一：直接运行 exe（推荐）
+
+从 [**Releases**](https://github.com/knownothing20/tv-remote/releases/latest) 下载最新 `TrayTVAdmin.exe`（约 16 MB，免安装、不依赖 Python）。
 
 1. 电视开启「开发者选项 → USB 调试 / 网络调试」，记下电视 IP
 2. 电脑与电视在同一网段，先手动验证一次：`adb connect <电视IP>:5555`
