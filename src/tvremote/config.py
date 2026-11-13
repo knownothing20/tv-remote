@@ -218,6 +218,7 @@ class Settings:
     check_updates: bool = True
     auto_launch_receiver: bool = False   # 电视在线且接收端未运行时自动拉起
     silent_launch: bool = True           # 拉起后立即退回原画面，不把接收端留在前台
+    foreground_on_cast: bool = True      # 投屏进行中自动把接收端切到前台（否则有声音无画面）
 
 
 def _read_json(path: str) -> dict:

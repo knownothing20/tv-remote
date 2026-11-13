@@ -3,6 +3,16 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.5.9] - 2026-11-13
+
+### Added
+
+- **投屏时自动切前台**（`foreground_on_cast`，默认开启）：看门狗检测到接收端端口（7000）
+  存在已建立连接时，自动把 CastBay 切到前台。
+  原因：映湾退到后台后系统销毁渲染 Surface，音频仍播放但**画面全黑**（用户实测确认）。
+- 看门狗上移至 `make_server()`，托盘模式与 headless 模式行为一致。
+- 面板「设备」弹窗新增对应开关。
+
 ## [1.5.8] - 2026-11-13
 
 ### Changed

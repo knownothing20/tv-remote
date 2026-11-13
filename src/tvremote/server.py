@@ -457,6 +457,7 @@ _ping = {"t": 0.0, "v": False}
 _online_state = {"last": None}
 _launch_guard = {"t": 0.0}
 RECEIVER_PKG = "com.weenas.castbay"
+CAST_PORT = 7000
 
 
 def _foreground_pkg() -> str:
@@ -468,6 +469,40 @@ def _media_playing() -> bool:
     """检测是否有媒体正在播放，避免打断观看。"""
     out = sh("dumpsys media_session | grep -m1 -E 'state=PlaybackState \\{state=3'", timeout=12)
     return bool(out.strip())
+
+
+def _cast_connected() -> bool:
+    """接收端端口上是否已有已建立的连接（说明 iPad 已经开始投屏）。"""
+    out = sh(f"netstat -an 2>/dev/null | grep ':{CAST_PORT} ' | grep -i established", timeout=8)
+    return bool(out.strip())
+
+
+_foreground_guard = {"t": 0.0}
+
+
+def _ensure_foreground_on_cast() -> None:
+    """投屏期间把接收端切到前台。
+
+    接收端退到后台后，渲染用的 Surface 会被系统销毁：音频仍能播放，
+    但视频没有可绘制目标，表现就是「有声音、画面全黑」。
+    """
+    now = time.time()
+    if now - _foreground_guard["t"] < 8:
+        return
+    try:
+        if not load_settings().foreground_on_cast:
+            return
+        if _foreground_pkg() == RECEIVER_PKG:
+            return
+        if not _cast_connected():
+            return
+    except Exception:
+        return
+    _foreground_guard["t"] = now
+    try:
+        sh(f"monkey -p {RECEIVER_PKG} 1", timeout=15)
+    except Exception:
+        pass
 
 
 def _maybe_launch_receiver() -> None:
@@ -691,6 +726,7 @@ class Handler(BaseHTTPRequestHandler):
                 "check_updates": s.check_updates,
                 "auto_launch_receiver": s.auto_launch_receiver,
                 "silent_launch": s.silent_launch,
+                "foreground_on_cast": s.foreground_on_cast,
             }, ensure_ascii=False))
         elif path == "/api/screen":
             self.stream_screen()
@@ -724,6 +760,7 @@ class Handler(BaseHTTPRequestHandler):
                 check_updates=body.get("check_updates"),
                 auto_launch_receiver=body.get("auto_launch_receiver"),
                 silent_launch=body.get("silent_launch"),
+                foreground_on_cast=body.get("foreground_on_cast"),
             )
             with _cache_lock:
                 _cache.pop("update", None)
@@ -734,6 +771,7 @@ class Handler(BaseHTTPRequestHandler):
                 "check_updates": s.check_updates,
                 "auto_launch_receiver": s.auto_launch_receiver,
                 "silent_launch": s.silent_launch,
+                "foreground_on_cast": s.foreground_on_cast,
             }, ensure_ascii=False))
             return
 
@@ -772,22 +810,35 @@ class Handler(BaseHTTPRequestHandler):
 
 def make_server(port: int | None = None, host: str | None = None) -> ThreadingHTTPServer:
     cfg_ = cfg()
+    start_watchdog()
     bind = host or cfg_.host
     srv = ThreadingHTTPServer((bind, port or cfg_.port), Handler)
     srv.daemon_threads = True
     return srv
 
 
-def serve(port: int | None = None, host: str | None = None):
+_watchdog_started = False
+
+
+def start_watchdog() -> None:
+    """后台守护：心跳 + 投屏前台切换。托盘与 headless 模式共用。"""
+    global _watchdog_started
+    if _watchdog_started:
+        return
+    _watchdog_started = True
     interval = max(3, int(cfg().poll_seconds))
 
-    def _watchdog():
+    def loop():
         while True:
             try:
                 tv_online()
+                _ensure_foreground_on_cast()
             except Exception:
                 pass
             time.sleep(interval)
 
-    threading.Thread(target=_watchdog, daemon=True).start()
+    threading.Thread(target=loop, daemon=True).start()
+
+
+def serve(port: int | None = None, host: str | None = None):
     make_server(port, host).serve_forever()
