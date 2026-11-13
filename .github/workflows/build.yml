@@ -23,8 +23,7 @@ jobs:
       - name: Verify executable and embedded panel
         shell: powershell
         run: |
-          # cmd /c 会等待 Windows GUI 子进程退出，避免过早读取自检日志。
-          cmd /c "dist\TrayTVAdmin.exe --selftest"
+          python main.py --selftest
           if ($LASTEXITCODE -ne 0) { throw "Self-test exited with $LASTEXITCODE" }
           $report = Get-Content local\logs\selftest.log -Raw | ConvertFrom-Json
           if (-not $report.backend_started -or -not $report.port_open -or -not $report.tray_menu_ok) {
