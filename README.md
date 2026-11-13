@@ -3,7 +3,7 @@
 > 仓库：<https://github.com/knownothing20/tv-remote> · 最新版见 [Releases](https://github.com/knownothing20/tv-remote/releases)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.1.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3.11)
 
@@ -49,6 +49,34 @@ python main.py --export-icons assets/icons
 
 也可以 `python -m tvremote`（需先把 `src` 加入 `PYTHONPATH`）。
 
+## 局域网访问与 Docker
+
+面板默认监听 `127.0.0.1`——**只有运行它的那台电脑能打开**。让 iPad / 手机也能访问，把 `host`
+改成 `0.0.0.0`（或用环境变量 `TVREMOTE_HOST=0.0.0.0`）：
+
+```json
+{ "device": "192.168.1.10:5555", "host": "0.0.0.0", "port": 8777, "token": "" }
+```
+
+访问 `http://<电脑IP>:8777`。暴露到局域网时建议同时设置 `token`，
+之后地址为 `http://<电脑IP>:8777/?token=你的口令`。
+
+### Docker（推荐常开）
+
+镜像只跑 Web 面板（无托盘），适合 NAS / 小主机 7×24 常驻：
+
+```bash
+docker run -d --name tv-remote -p 8777:8777 \
+  -e TVREMOTE_DEVICE=192.168.31.226:5555 \
+  -e TVREMOTE_HOST=0.0.0.0 \
+  -v $(pwd)/local:/app/local \
+  --restart unless-stopped \
+  ghcr.io/knownothing20/tv-remote:latest
+```
+
+镜像：`ghcr.io/knownothing20/tv-remote`（`amd64` / `arm64`，同时提供 `:vX.Y.Z` 版本标签）。
+部署细节、adb 授权与排错见 [docs/DOCKER.md](docs/DOCKER.md)。
+
 ## 本地数据与隐私
 
 所有本地信息集中在 **`local/`** 目录（已加入 `.gitignore`，不会进仓库）：
@@ -66,8 +94,10 @@ local/
 ```json
 {
   "device": "192.168.1.10:5555",
+  "host": "127.0.0.1",
   "port": 8777,
   "adb": "",
+  "token": "",
   "poll_seconds": 5
 }
 ```
@@ -75,12 +105,14 @@ local/
 | 字段 | 说明 |
 |---|---|
 | `device` | 电视 ADB 地址，`IP:端口` |
-| `port` | 本地 Web 面板端口，默认 `8777` |
+| `host` | 监听地址；`127.0.0.1` 仅本机，`0.0.0.0` 允许局域网访问 |
+| `port` | Web 面板端口，默认 `8777` |
 | `adb` | adb 可执行文件路径，留空则自动在 `PATH` / `ANDROID_HOME` / 常见目录里找 |
+| `token` | 可选访问口令；设置后请求需带 `?token=` 或 `X-Auth-Token` |
 | `poll_seconds` | 托盘图标状态轮询间隔（秒） |
 
-也可用环境变量覆盖：`TVREMOTE_DEVICE` / `TVREMOTE_PORT` / `TVREMOTE_ADB` / `TVREMOTE_POLL`，
-命令行还支持 `--device` 与 `--port`。
+也可用环境变量覆盖：`TVREMOTE_DEVICE` / `TVREMOTE_HOST` / `TVREMOTE_PORT` / `TVREMOTE_ADB` /
+`TVREMOTE_TOKEN` / `TVREMOTE_POLL`，命令行还支持 `--device`、`--host`、`--port`。
 
 ### 隐私脱敏
 
@@ -163,10 +195,11 @@ powershell -ExecutionPolicy Bypass -File scripts/build.ps1
 
 | 版本 | 主题 |
 |---|---|
-| v1.1.0 | 多设备管理（`local/devices.json` + 面板切换） |
-| v1.2.0 | 应用管理（卸载 / 停用 / 清数据 / 自启动开关） |
-| v1.3.0 | 更新检查（只提示，不自动下载） |
-| v1.4.0 | 局域网访问（可选口令 + PWA） |
+| v1.1.0 | **局域网访问 + Docker ✔ 已发布** |
+| v1.2.0 | 多设备管理（`local/devices.json` + 面板切换） |
+| v1.3.0 | 应用管理（卸载 / 停用 / 清数据 / 自启动开关） |
+| v1.4.0 | 更新检查（只提示，不自动下载） |
+| v1.5.0 | 面板体验（PWA / 主题切换 / 趋势图表） |
 | v2.0.0 | 采集器插件化 + macOS / Linux 托盘 |
 
 发布流程：改 `__version__` 与 `CHANGELOG.md` → 打 tag `vX.Y.Z` → CI 自动构建 exe 并挂到 Release。

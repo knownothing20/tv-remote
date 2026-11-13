@@ -3,6 +3,19 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.1.0] - 2026-11-13
+
+局域网访问与容器化部署。
+
+### Added
+
+- `host` 配置项：设为 `0.0.0.0` 后同网段设备可直接打开面板
+- `token` 配置项：可选访问口令，支持 `?token=` 与 `X-Auth-Token`
+- `--headless` 无界面模式，Dockerfile / docker-compose.yml / docs/DOCKER.md
+- CI 新增 Docker 任务：推送 `ghcr.io/knownothing20/tv-remote:latest` 与 `:vX.Y.Z`（amd64 + arm64）
+- `/api/status` 返回版本号；面板徽标与托盘 tooltip 显示版本
+- adb 掉线后自动 `connect` 重试一次（容器与远程场景）
+
 ## [1.0.0] - 2026-11-13
 
 首个公开版本。

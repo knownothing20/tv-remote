@@ -235,6 +235,11 @@ def _load_boot():
     _boot_loading = False
 
 
+def warmup():
+    """启动时后台预热较重的采集项（自启动清单）。"""
+    threading.Thread(target=_load_boot, daemon=True).start()
+
+
 def get_whitelist() -> list:
     return [l.split(",")[1] for l in sh("cmd deviceidle whitelist", timeout=10).splitlines() if l.count(",") >= 1]
 
@@ -341,7 +346,21 @@ class Handler(BaseHTTPRequestHandler):
         except (BrokenPipeError, ConnectionResetError):
             pass
 
+    def _authorized(self) -> bool:
+        """未配置 token 时不做校验；配置后支持 ?token= 或 X-Auth-Token。"""
+        token = cfg().token
+        if not token:
+            return True
+        if self.headers.get("X-Auth-Token") == token:
+            return True
+        from urllib.parse import parse_qs
+
+        return parse_qs(urlparse(self.path).query).get("token", [""])[0] == token
+
     def do_GET(self):
+        if not self._authorized():
+            self._send(401, json.dumps({"error": "unauthorized"}, ensure_ascii=False))
+            return
         path = urlparse(self.path).path
         if path == "/":
             self._send(200, load_html(), "text/html; charset=utf-8")
@@ -365,6 +384,9 @@ class Handler(BaseHTTPRequestHandler):
             self._send(404, json.dumps({"error": "not found"}))
 
     def do_POST(self):
+        if not self._authorized():
+            self._send(401, json.dumps({"error": "unauthorized"}, ensure_ascii=False))
+            return
         path = urlparse(self.path).path
         try:
             n = int(self.headers.get("Content-Length", 0))
@@ -417,12 +439,13 @@ class Handler(BaseHTTPRequestHandler):
             _screen_lock.release()
 
 
-def make_server(port: int | None = None) -> ThreadingHTTPServer:
+def make_server(port: int | None = None, host: str | None = None) -> ThreadingHTTPServer:
     cfg_ = cfg()
-    srv = ThreadingHTTPServer(("127.0.0.1", port or cfg_.port), Handler)
+    bind = host or cfg_.host
+    srv = ThreadingHTTPServer((bind, port or cfg_.port), Handler)
     srv.daemon_threads = True
     return srv
 
 
-def serve(port: int | None = None):
-    make_server(port).serve_forever()
+def serve(port: int | None = None, host: str | None = None):
+    make_server(port, host).serve_forever()

@@ -30,8 +30,9 @@ class Adb:
     def __init__(self, device: str, adb_path: str = ""):
         self.device = device
         self.path = find_adb(adb_path)
+        self._last_connect = 0.0
 
-    def run(self, args: list[str], timeout: int = 20) -> tuple[bytes, str, int]:
+    def _exec(self, args: list[str], timeout: int = 20) -> tuple[bytes, str, int]:
         try:
             p = subprocess.run(
                 [self.path, "-s", self.device] + args,
@@ -47,11 +48,28 @@ class Adb:
         except Exception as e:  # noqa: BLE001
             return b"", str(e), 1
 
+    def run(self, args: list[str], timeout: int = 20) -> tuple[bytes, str, int]:
+        """执行 adb 命令；设备掉线时自动 connect 后重试一次（容器/远程场景必需）。"""
+        out, err, rc = self._exec(args, timeout)
+        if rc != 0:
+            low = err.lower()
+            if any(k in low for k in ("not found", "offline", "no devices", "unauthorized", "cannot connect", "closed")):
+                self.connect()
+                out, err, rc = self._exec(args, timeout)
+        return out, err, rc
+
     def shell(self, cmd: str, timeout: int = 20) -> str:
         out, _err, _rc = self.run(["shell", cmd], timeout=timeout)
         return out.decode("utf-8", "ignore").strip()
 
     def connect(self, timeout: int = 8) -> bool:
+        """按需连接 TCP 设备，5 秒内不重复尝试。"""
+        import time
+
+        now = time.time()
+        if now - self._last_connect < 5:
+            return False
+        self._last_connect = now
         try:
             subprocess.run(
                 [self.path, "connect", self.device],

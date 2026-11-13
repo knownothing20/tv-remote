@@ -1,0 +1,17 @@
+.git
+.github
+.gitignore
+.gitattributes
+build
+dist
+local
+assets/preview
+docs
+scripts
+legacy
+*.spec
+*.exe
+*.ico
+*.png
+*.md
+!README.md

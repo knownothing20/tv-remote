@@ -57,6 +57,7 @@ class Backend:
         if port_open(self.cfg.port):
             return True
         server.init(self.cfg)
+        server.warmup()
         try:
             self.srv = server.make_server(self.cfg.port)
             threading.Thread(target=self.srv.serve_forever, daemon=True).start()

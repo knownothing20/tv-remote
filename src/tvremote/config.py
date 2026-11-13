@@ -23,8 +23,10 @@ from dataclasses import asdict, dataclass, fields
 
 DEFAULTS = {
     "device": "192.168.1.10:5555",
+    "host": "127.0.0.1",
     "port": 8777,
     "adb": "",
+    "token": "",
     "poll_seconds": 5,
 }
 
@@ -72,13 +74,20 @@ def resource_path(rel: str) -> str:
 @dataclass
 class Config:
     device: str = DEFAULTS["device"]
+    host: str = DEFAULTS["host"]
     port: int = DEFAULTS["port"]
     adb: str = DEFAULTS["adb"]
+    token: str = DEFAULTS["token"]
     poll_seconds: int = DEFAULTS["poll_seconds"]
 
     @property
     def url(self) -> str:
-        return f"http://127.0.0.1:{self.port}"
+        host = "127.0.0.1" if self.host in ("0.0.0.0", "", "::") else self.host
+        return f"http://{host}:{self.port}"
+
+    @property
+    def lan(self) -> bool:
+        return self.host not in ("127.0.0.1", "localhost", "")
 
 
 @dataclass
@@ -118,8 +127,10 @@ def load_config(path: str | None = None) -> Config:
         raw.update(_read_json(path))
 
     raw["device"] = os.environ.get("TVREMOTE_DEVICE", raw["device"])
+    raw["host"] = os.environ.get("TVREMOTE_HOST", raw["host"])
     raw["port"] = int(os.environ.get("TVREMOTE_PORT", raw["port"]))
     raw["adb"] = os.environ.get("TVREMOTE_ADB", raw.get("adb") or "")
+    raw["token"] = os.environ.get("TVREMOTE_TOKEN", raw.get("token") or "")
     raw["poll_seconds"] = int(os.environ.get("TVREMOTE_POLL", raw["poll_seconds"]))
 
     allowed = {f.name for f in fields(Config)}

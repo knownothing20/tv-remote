@@ -1,0 +1,20 @@
+services:
+  tv-remote:
+    image: ghcr.io/knownothing20/tv-remote:latest
+    container_name: tv-remote
+    restart: unless-stopped
+    ports:
+      - "8777:8777"
+    environment:
+      # 电视的 ADB 地址（必填）
+      TVREMOTE_DEVICE: "192.168.1.10:5555"
+      # 容器内必须监听 0.0.0.0，否则宿主机访问不到
+      TVREMOTE_HOST: "0.0.0.0"
+      TVREMOTE_PORT: "8777"
+      # 可选：设置后所有请求需要 ?token=xxx（暴露到局域网时建议开启）
+      TVREMOTE_TOKEN: ""
+    volumes:
+      # 配置 / 设置 / 日志 / 截图
+      - ./local:/app/local
+      # 可选：复用宿主机已授权的 adb 密钥，免去电视上重新点「允许」
+      # - ${HOME}/.android:/root/.android:ro

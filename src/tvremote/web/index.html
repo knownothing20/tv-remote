@@ -79,13 +79,16 @@ button.pri:hover{background:#388bfd}
 </div>
 <script>
 const $ = id => document.getElementById(id);
+const TK = new URLSearchParams(location.search).get('token') || '';
+const TKQ = TK ? ('?token=' + encodeURIComponent(TK)) : '';
+const AUTH = TK ? {'X-Auth-Token': TK} : {};
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const row = (k, v) => `<div class="row"><span class="k">${esc(k)}</span><b>${esc(v)}</b></div>`;
 const bar = pct => `<div class="bar ${pct>85?'bad':pct>65?'warn':''}"><i style="width:${Math.min(pct,100)}%"></i></div>`;
 
 async function refresh(){
   try{
-    const r = await fetch('/api/status');
+    const r = await fetch('/api/status' + TKQ);
     const d = await r.json();
     $('dev').className = 'badge ' + (d.online ? 'on' : 'off');
     $('dev').textContent = d.online ? (d.props?.['ro.product.model'] || d.device) + ' · 在线' : '离线';
@@ -124,7 +127,7 @@ async function refresh(){
 }
 
 async function act(cmd){
-  const r = await fetch('/api/action', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({cmd})});
+  const r = await fetch('/api/action' + TKQ, {method:'POST', headers: Object.assign({'Content-Type':'application/json'}, AUTH), body: JSON.stringify({cmd})});
   const d = await r.json();
   alert(d.msg + (d.path ? '\n' + d.path : ''));
   refresh();
@@ -138,7 +141,7 @@ function startTimer(ms){
 
 async function loadSettings(){
   try{
-    const s = await (await fetch('/api/settings')).json();
+    const s = await (await fetch('/api/settings' + TKQ)).json();
     $('mask').checked = !!s.mask_sensitive;
     startTimer((s.refresh_seconds || 5) * 1000);
   }catch(e){
@@ -148,15 +151,16 @@ async function loadSettings(){
 
 async function toggleMask(on){
   try{
-    await fetch('/api/settings', {
+    await fetch('/api/settings' + TKQ, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: Object.assign({'Content-Type': 'application/json'}, AUTH),
       body: JSON.stringify({mask_sensitive: on})
     });
   }catch(e){}
   refresh();
 }
 
+$('screen').src = '/api/screen' + TKQ;
 refresh();
 loadSettings();
 </script>
