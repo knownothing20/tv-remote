@@ -3,6 +3,14 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.5.3] - 2026-11-13
+
+### Fixed
+
+- **托盘心跳未携带访问口令**：启用 `token` 后 `/api/ping` 返回 401，被误判为离线，
+  表现为托盘图标一直黑屏、`--selftest` 报 `device_online: false`。
+  现在心跳请求会自动附带 `?token=`。
+
 ## [1.5.2] - 2026-11-13
 
 ### Fixed

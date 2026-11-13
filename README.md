@@ -3,7 +3,7 @@
 > 仓库：<https://github.com/knownothing20/tv-remote> · 最新版见 [Releases](https://github.com/knownothing20/tv-remote/releases)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-1.5.2-blue)
+![Version](https://img.shields.io/badge/version-1.5.3-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3.11)
 

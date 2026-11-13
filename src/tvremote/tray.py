@@ -13,6 +13,7 @@ import time
 import traceback
 import urllib.request
 import webbrowser
+from urllib.parse import quote
 
 from . import __version__, icons, privacy, server
 from .config import Config, load_config, load_devices, logs_dir, set_active_device
@@ -38,10 +39,11 @@ def port_open(port: int, timeout: float = 0.4) -> bool:
         s.close()
 
 
-def device_online(url: str, timeout: float = 6.0) -> bool:
-    """心跳判定：服务端首次 adb 探测可能需要数秒，超时给足余量。"""
+def device_online(url: str, token: str = "", timeout: float = 6.0) -> bool:
+    """心跳判定：必须带上访问口令，否则服务端返回 401 会被误判为离线。"""
+    query = ("?token=" + quote(token)) if token else ""
     try:
-        with urllib.request.urlopen(url + "/api/ping", timeout=timeout) as r:
+        with urllib.request.urlopen(url + "/api/ping" + query, timeout=timeout) as r:
             return bool(json.loads(r.read().decode("utf-8")).get("tv"))
     except Exception:
         return False
@@ -157,7 +159,7 @@ def run_tray(config: Config):
     def poll():
         while True:
             try:
-                online = device_online(config.url)
+                online = device_online(config.url, config.token)
                 icon.icon = on_img if online else off_img
                 icon.title = f"电视管理后台 v{__version__} · " + ("已连接" if online else "未连接")
             except Exception as e:  # noqa: BLE001
@@ -174,7 +176,7 @@ def selftest(config: Config) -> dict:
     backend = Backend(config)
     result["backend_started"] = backend.start()
     result["port_open"] = port_open(config.port)
-    result["device_online"] = device_online(config.url, timeout=15)
+    result["device_online"] = device_online(config.url, config.token, timeout=15)
     try:
         import pystray
         from pystray import Menu, MenuItem
