@@ -38,7 +38,8 @@ def port_open(port: int, timeout: float = 0.4) -> bool:
         s.close()
 
 
-def device_online(url: str, timeout: float = 2.5) -> bool:
+def device_online(url: str, timeout: float = 6.0) -> bool:
+    """心跳判定：服务端首次 adb 探测可能需要数秒，超时给足余量。"""
     try:
         with urllib.request.urlopen(url + "/api/ping", timeout=timeout) as r:
             return bool(json.loads(r.read().decode("utf-8")).get("tv"))
@@ -173,7 +174,7 @@ def selftest(config: Config) -> dict:
     backend = Backend(config)
     result["backend_started"] = backend.start()
     result["port_open"] = port_open(config.port)
-    result["device_online"] = device_online(config.url)
+    result["device_online"] = device_online(config.url, timeout=15)
     try:
         import pystray
         from pystray import Menu, MenuItem

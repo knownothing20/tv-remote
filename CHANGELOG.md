@@ -3,6 +3,13 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.5.2] - 2026-11-13
+
+### Fixed
+
+- 自检/托盘心跳的超时竞态：客户端 2.5 秒超时 < 服务端首次 adb 探测 3 秒，
+  导致 `--selftest` 误报 `device_online: false`、托盘图标偶发黑屏。改为 6 秒（自检 15 秒）。
+
 ## [1.5.1] - 2026-11-13
 
 补丁：为「一键更新」提供本地版本标识。
