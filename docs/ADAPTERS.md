@@ -4,7 +4,7 @@
 适配器就是一张 **包名 → 中文名 / 角色 / 是否可禁用** 的映射表，一个机型一个 JSON 文件。
 
 ```
-src/tvremote/adapters/
+adapters/
 ├─ tcl_mt5879_cn.json     # TCL MT5879（Android 11 国内版）— 参考实现，57 条
 ├─ _template.json         # 新机型从这里复制
 └─ <vendor>_<soc>_<region>.json
@@ -80,7 +80,7 @@ adb shell dumpsys activity services | grep -oE '[a-zA-Z0-9_.]+/[a-zA-Z0-9_.$]+' 
 5. **判定 policy**：先在电视上 `pm disable-user --user 0 <包名>` 试，确认不影响使用再写 `bloat`/`optional`；
    桌面、`system_server`、`tcl_system_server`、安装器、权限管理、`systemui` 一律 `avoid`。
 
-6. 提交 PR，文件放 `src/tvremote/adapters/` 即可，无需改代码。
+6. 提交 PR，文件放 `adapters/` 即可，无需改代码、**也不需要重新打包 exe**。
 
 ## 调试
 

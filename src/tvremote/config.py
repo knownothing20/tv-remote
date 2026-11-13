@@ -152,10 +152,19 @@ def remove_device(device_id: str) -> dict:
 
 
 def resource_path(rel: str) -> str:
-    """打包后资源在 _MEIPASS，源码运行时在包目录。"""
+    """资源查找顺序：exe 同级目录 → 打包内 _MEIPASS → 源码包目录。
+
+    把 ``web/``、``adapters/`` 放在 exe 旁边即可覆盖内置副本，
+    改完刷新页面 / 重启面板就生效，**不需要重新打包**。
+    """
+    external = os.path.join(app_dir(), rel)
+    if os.path.exists(external):
+        return external
     base = getattr(sys, "_MEIPASS", None)
     if base:
-        return os.path.join(base, rel)
+        bundled = os.path.join(base, rel)
+        if os.path.exists(bundled):
+            return bundled
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), rel)
 
 

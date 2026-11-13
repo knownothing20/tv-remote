@@ -13,5 +13,6 @@ legacy
 *.exe
 *.ico
 *.png
+!web/*.png
 *.md
 !README.md

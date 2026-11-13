@@ -31,6 +31,8 @@ ENV PATH="/opt/platform-tools:${PATH}"
 WORKDIR /app
 COPY main.py ./
 COPY src/ ./src/
+COPY web/ ./web/
+COPY adapters/ ./adapters/
 
 VOLUME ["/app/local"]
 

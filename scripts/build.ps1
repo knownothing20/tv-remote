@@ -19,12 +19,22 @@ Write-Host "==> PyInstaller 打包" -ForegroundColor Cyan
 & $Python -m PyInstaller --noconfirm --clean --onefile --noconsole `
     --name $Name `
     --icon "assets/icons/tv_on.ico" `
-    --add-data "src/tvremote/web;web" `
-    --add-data "src/tvremote/adapters;tvremote/adapters" `
+    --add-data "web;web" `
+    --add-data "adapters;adapters" `
     --paths src `
     --hidden-import pystray._win32 `
     --hidden-import pystray._base `
     --hidden-import pystray._util.win32 `
+    --exclude-module numpy `
+    --exclude-module tkinter `
+    --exclude-module unittest `
+    --exclude-module doctest `
+    --exclude-module pydoc `
+    --exclude-module pydoc_data `
+    --exclude-module lib2to3 `
+    --exclude-module distutils `
+    --exclude-module setuptools `
+    --exclude-module pip `
     main.py 2>&1 | Out-Host
 
 if ($LASTEXITCODE -ne 0) { throw "构建失败，退出码 $LASTEXITCODE" }

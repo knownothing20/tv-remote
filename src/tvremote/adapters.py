@@ -11,9 +11,25 @@ from __future__ import annotations
 
 import json
 import os
-from functools import lru_cache
+import sys
 
-ADAPTER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "adapters")
+from .config import app_dir
+
+def adapter_dirs() -> list:
+    """查找顺序：exe 同级 adapters/ → 打包内 adapters/ → 源码包内目录。"""
+    dirs = []
+    external = os.path.join(app_dir(), "adapters")
+    if os.path.isdir(external):
+        dirs.append(external)
+    base = getattr(sys, "_MEIPASS", None)
+    if base:
+        bundled = os.path.join(base, "adapters")
+        if os.path.isdir(bundled):
+            dirs.append(bundled)
+    source_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "adapters")
+    if os.path.isdir(source_dir):
+        dirs.append(source_dir)
+    return dirs
 
 POLICY_LABELS = {
     "avoid": "禁止改动",
@@ -23,22 +39,27 @@ POLICY_LABELS = {
 }
 
 
-@lru_cache(maxsize=1)
 def _load_all() -> tuple:
-    items = []
-    try:
-        names = sorted(os.listdir(ADAPTER_DIR))
-    except OSError:
-        return tuple()
-    for name in names:
-        if not name.endswith(".json") or name.startswith("_"):
-            continue
+    items, seen = [], set()
+    for directory in adapter_dirs():
         try:
-            with open(os.path.join(ADAPTER_DIR, name), encoding="utf-8") as f:
-                data = json.load(f)
-        except Exception:
+            names = sorted(os.listdir(directory))
+        except OSError:
             continue
-        if data.get("id") and isinstance(data.get("packages"), dict):
+        for name in names:
+            if not name.endswith(".json") or name.startswith("_"):
+                continue
+            try:
+                with open(os.path.join(directory, name), encoding="utf-8") as f:
+                    data = json.load(f)
+            except Exception:
+                continue
+            if not data.get("id") or not isinstance(data.get("packages"), dict):
+                continue
+            if data["id"] in seen:      # 外部同名文件优先，跳过内置
+                continue
+            seen.add(data["id"])
+            data["_source"] = directory
             items.append(data)
     return tuple(items)
 

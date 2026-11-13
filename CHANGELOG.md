@@ -3,6 +3,23 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.7.0] - 2026-11-13
+
+把「面板」和「适配器」从 exe 里搬出来，日常改动不再需要重新打包。
+
+### Changed
+
+- **`web/`（面板）与 `adapters/`（机型映射）移到仓库根目录**，运行时按
+  「exe 同级目录 → 打包内副本」的顺序查找；内置副本仅作兜底
+- 改 `web/index.html` 等静态文件 → **刷新浏览器即生效**，连服务都不用重启
+- 改 `adapters/*.json` → 10 秒内生效（或托盘右键「重启服务（面板）」立即生效）
+- 打包排除 `numpy` / `tkinter` / `unittest` / `setuptools` / `pip` 等未使用模块
+
+### Added
+
+- `docs/ADAPTERS.md` 增加"自己机器上调试适配器"的说明
+- README 增加「不用重新打包就能改的东西」小节
+
 ## [1.6.1] - 2026-11-13
 
 托盘重启体验。

@@ -3,7 +3,7 @@
 > 仓库：<https://github.com/knownothing20/tv-remote> · 最新版见 [Releases](https://github.com/knownothing20/tv-remote/releases)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-1.6.1-blue)
+![Version](https://img.shields.io/badge/version-1.7.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3.11)
 
@@ -80,6 +80,26 @@ docker run -d --name tv-remote -p 8777:8777 \
 
 镜像：`ghcr.io/knownothing20/tv-remote`（`amd64` / `arm64`，同时提供 `:vX.Y.Z` 版本标签）。
 部署细节、adb 授权与排错见 [docs/DOCKER.md](docs/DOCKER.md)。
+
+## 不用重新打包就能改的东西
+
+面板和适配器都是 exe **外部**的数据，放在程序同级目录：
+
+```
+tv-remote/
+├─ TrayTVAdmin.exe
+├─ web/            ← 面板（index.html / manifest / 图标）
+└─ adapters/       ← 机型映射（包名 → 中文名）
+```
+
+| 想改什么 | 怎么改 | 生效方式 |
+|---|---|---|
+| 面板布局、样式、交互 | 编辑 `web/index.html` | **刷新浏览器**（连服务都不用重启） |
+| 包名中文名 / 策略标签 | 编辑 `adapters/*.json` | 10 秒内生效，或托盘「重启服务（面板）」 |
+| 配置（设备 / 端口 / 口令） | 编辑 `local/config.json` | 托盘「重启服务（面板）」 |
+
+只有改动 **Python 代码**（`src/tvremote/`）才需要重新打包。
+如果删掉 `web/` 或 `adapters/`，程序会回落到 exe 内置的副本，不会报错。
 
 ## 常用操作（Windows 桌面版）
 

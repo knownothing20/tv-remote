@@ -451,7 +451,7 @@ def get_history() -> list:
 
 def adapter_payload() -> dict:
     """当前设备命中的机型适配器（包名 -> 中文名 / 角色 / 策略）。"""
-    return cached("adapter", 600, lambda: adapters.payload(get_props()))
+    return cached("adapter", 10, lambda: adapters.payload(get_props()))
 
 
 def get_whitelist() -> list:
