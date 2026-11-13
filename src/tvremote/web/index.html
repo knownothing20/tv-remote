@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>电视管理后台</title>
+<style>
+:root{--bg:#0d1117;--card:#161b22;--line:#21262d;--txt:#e6edf3;--dim:#8b949e;--acc:#58a6ff;--ok:#3fb950;--warn:#d29922;--bad:#f85149}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font:14px/1.5 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif;padding:20px}
+header{display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+h1{font-size:20px;font-weight:600}
+.badge{font-size:12px;padding:3px 9px;border-radius:20px;border:1px solid var(--line)}
+.on{color:var(--ok);border-color:#238636}
+.off{color:var(--bad);border-color:#6e2c2c}
+.dim{color:var(--dim);font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+.card h2{font-size:13px;color:var(--dim);font-weight:600;letter-spacing:.05em;margin-bottom:10px}
+.row{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px dashed #1d2229;font-size:13px}
+.row:last-child{border:0}
+.row b{font-weight:500;color:var(--txt)}
+.k{color:var(--dim)}
+.bar{height:6px;background:#21262d;border-radius:3px;overflow:hidden;margin:6px 0 2px}
+.bar>i{display:block;height:100%;background:var(--acc)}
+.bar.warn>i{background:var(--warn)}
+.bar.bad>i{background:var(--bad)}
+ul{list-style:none;max-height:230px;overflow:auto;font-size:12.5px}
+ul li{padding:3px 0;border-bottom:1px dashed #1d2229;color:#c9d1d9;word-break:break-all}
+ul li:last-child{border:0}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+button{background:#21262d;color:var(--txt);border:1px solid #30363d;border-radius:7px;padding:7px 12px;font-size:13px;cursor:pointer}
+button:hover{background:#30363d;border-color:var(--acc)}
+button.pri{background:#1f6feb;border-color:#1f6feb}
+button.pri:hover{background:#388bfd}
+#screen{width:100%;border-radius:8px;background:#000;display:block;min-height:180px}
+.tag{font-size:11px;color:var(--dim);margin-top:6px}
+.pill{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;background:#21262d;color:var(--dim);margin-left:6px}
+.sw{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);cursor:pointer;user-select:none}
+.sw input{accent-color:#58a6ff;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <h1>📺 电视管理后台</h1>
+  <span id="dev" class="badge">连接中…</span>
+  <span id="ver" class="pill">v—</span>
+  <span id="ts" class="dim"></span>
+  <span style="flex:1"></span>
+  <label class="sw" title="默认隐藏 IP、序列号、Wi-Fi 名称；设置保存在 local/settings.json">
+    <input type="checkbox" id="mask" checked onchange="toggleMask(this.checked)"> 隐藏敏感信息
+  </label>
+  <button onclick="refresh()">立即刷新</button>
+</header>
+<div class="grid">
+  <div class="card" style="grid-column:span 2;min-width:320px">
+    <h2>实时画面 <span class="pill" id="fps">—</span></h2>
+    <img id="screen" src="/api/screen" alt="电视画面">
+    <div class="tag">约 1 帧/秒（受电视截屏速度限制），仅支持单路查看</div>
+    <div class="btns">
+      <button class="pri" onclick="act('castbay')">打开映湾</button>
+      <button onclick="act('home')">回桌面</button>
+      <button onclick="act('back')">返回键</button>
+      <button onclick="act('whitelist')">加白名单</button>
+      <button onclick="act('screenshot')">保存截图</button>
+    </div>
+  </div>
+
+  <div class="card"><h2>硬件信息</h2><div id="hw"></div></div>
+  <div class="card"><h2>内存 &amp; 运行时长</h2><div id="mem"></div></div>
+  <div class="card"><h2>存储</h2><div id="sto"></div></div>
+  <div class="card"><h2>网络</h2><div id="net"></div></div>
+  <div class="card"><h2>前台应用</h2><div id="fg"></div></div>
+  <div class="card"><h2>CastBay 状态</h2><div id="cb"></div></div>
+  <div class="card"><h2>进程 Top（按内存）</h2><ul id="proc"></ul></div>
+  <div class="card"><h2>后台服务 <span class="pill" id="svcN"></span></h2><ul id="svc"></ul></div>
+  <div class="card"><h2>自启动应用（BOOT_COMPLETED）<span class="pill" id="bootN"></span></h2><ul id="boot"></ul></div>
+  <div class="card"><h2>省电白名单</h2><ul id="wl"></ul></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const row = (k, v) => `<div class="row"><span class="k">${esc(k)}</span><b>${esc(v)}</b></div>`;
+const bar = pct => `<div class="bar ${pct>85?'bad':pct>65?'warn':''}"><i style="width:${Math.min(pct,100)}%"></i></div>`;
+
+async function refresh(){
+  try{
+    const r = await fetch('/api/status');
+    const d = await r.json();
+    $('dev').className = 'badge ' + (d.online ? 'on' : 'off');
+    $('dev').textContent = d.online ? (d.props?.['ro.product.model'] || d.device) + ' · 在线' : '离线';
+    if (d.version) $('ver').textContent = 'v' + d.version;
+    $('ts').textContent = '更新于 ' + d.ts;
+    if(!d.online) return;
+    const p = d.props || {};
+    $('hw').innerHTML = row('型号', p['ro.product.model']) + row('品牌', p['ro.product.brand'])
+      + row('Android', p['ro.build.version.release'] + ' (API ' + p['ro.build.version.sdk'] + ')')
+      + row('CPU 架构', p['ro.product.cpu.abilist']) + row('主板', p['ro.product.board'])
+      + row('序列号', p['ro.serialno']) + row('分辨率', d.screen?.size)
+      + row('构建', p['ro.build.display.id']);
+    const m = d.mem || {};
+    $('mem').innerHTML = row('总内存', m.total_mb + ' MB') + row('已用', m.used_mb + ' MB')
+      + row('可用', m.avail_mb + ' MB') + bar(m.pct) + row('占用率', m.pct + '%')
+      + row('开机时长', d.uptime || '—');
+    $('sto').innerHTML = (d.storage||[]).map(s => row(s.mount, `${s.used_gb} / ${s.total_gb} GB (${s.pct}%)`) + bar(s.pct)).join('');
+    const n = d.net || {};
+    $('net').innerHTML = row('IP', n.ip || '—') + row('Wi-Fi', n.wifi?.ssid || '—')
+      + row('信号', n.wifi?.rssi || '—') + row('速率', n.wifi?.speed || '—');
+    const f = d.foreground || {};
+    $('fg').innerHTML = row('包名', f.package || '—') + row('Activity', f.activity || '—');
+    const c = d.castbay || {};
+    $('cb').innerHTML = row('已安装', c.installed ? '是' : '否') + row('运行中', c.running ? '是 (PID ' + c.pid + ')' : '否')
+      + row('接收端口', c.port || '未监听') + row('白名单', (d.whitelist||[]).includes('com.weenas.castbay') ? '已在' : '不在');
+    $('proc').innerHTML = (d.processes||[]).map(x => `<li>${esc(x.name)} <span class="pill">${x.rss_mb}MB</span></li>`).join('');
+    $('svc').innerHTML = (d.services||[]).map(s => `<li>${esc(s.pkg)} <span class="dim">${esc(s.svc)}</span></li>`).join('');
+    $('svcN').textContent = (d.services||[]).length + ' 项';
+    $('boot').innerHTML = (d.boot||[]).map(x => `<li>${esc(x)}</li>`).join('');
+    $('bootN').textContent = (d.boot||[]).length + ' 个应用';
+    $('wl').innerHTML = (d.whitelist||[]).map(x => `<li>${esc(x)}</li>`).join('') || '<li class="dim">空</li>';
+  }catch(e){
+    $('dev').className = 'badge off';
+    $('dev').textContent = '后台未连接';
+  }
+}
+
+async function act(cmd){
+  const r = await fetch('/api/action', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({cmd})});
+  const d = await r.json();
+  alert(d.msg + (d.path ? '\n' + d.path : ''));
+  refresh();
+}
+
+let timer = null;
+function startTimer(ms){
+  if (timer) clearInterval(timer);
+  timer = setInterval(refresh, ms || 5000);
+}
+
+async function loadSettings(){
+  try{
+    const s = await (await fetch('/api/settings')).json();
+    $('mask').checked = !!s.mask_sensitive;
+    startTimer((s.refresh_seconds || 5) * 1000);
+  }catch(e){
+    startTimer(5000);
+  }
+}
+
+async function toggleMask(on){
+  try{
+    await fetch('/api/settings', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({mask_sensitive: on})
+    });
+  }catch(e){}
+  refresh();
+}
+
+refresh();
+loadSettings();
+</script>
+</body>
+</html>

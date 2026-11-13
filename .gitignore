@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 构建产物
+build/
+dist/
+*.spec
+*.exe
+
+# 本地数据（配置/设置/日志/截图，绝不入库）
+local/
+
+# 运行期产物
+config.json
+*.log
+selftest.log
+tv_shot_*.png
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,8 @@
+# 运行期依赖
+pillow>=10.0
+
+# Windows 托盘后端
+pystray>=0.19
+
+# 打包（仅构建时需要，可注释掉）
+pyinstaller>=6.0
