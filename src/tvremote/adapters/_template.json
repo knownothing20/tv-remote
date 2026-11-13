@@ -1,0 +1,26 @@
+{
+  "id": "vendor_soc_region",
+  "name": "<厂商> <芯片> 系列（Android <版本> · <地区>）",
+  "vendor": "<厂商>",
+  "match": {
+    "ro.product.model": ["<ro.product.model 的值>"],
+    "ro.product.brand": ["<品牌>"]
+  },
+  "reference_device": "<参考机型，例如 XXX 55 寸 / 4GB RAM>",
+  "updated": "YYYY-MM-DD",
+  "notes": "采集方式：adb shell getprop ro.product.model；adb shell dumpsys package | grep BOOT_COMPLETED；adb shell dumpsys activity services。policy：avoid/keep/optional/bloat。",
+  "packages": {
+    "com.example.launcher": {
+      "name": "示例：桌面启动器",
+      "role": "system",
+      "policy": "avoid",
+      "note": "禁用会黑屏"
+    },
+    "com.example.bloat": {
+      "name": "示例：厂商预装推广服务",
+      "role": "vendor",
+      "policy": "bloat",
+      "note": "禁用不影响主要功能"
+    }
+  }
+}

@@ -69,6 +69,7 @@ canvas#chart{width:100%;height:52px;display:block;margin-top:8px}
   <h1>📺 电视管理后台</h1>
   <span id="dev" class="badge">连接中…</span>
   <span id="ver" class="pill">v—</span>
+  <span id="adp" class="pill" title="机型适配器：把包名翻译成中文名">适配器 —</span>
   <select id="devsel" class="sel" onchange="switchDevice(this.value)" title="切换设备"></select>
   <button class="mini" onclick="openManage()">设备</button>
   <span id="ts" class="dim"></span>
@@ -150,6 +151,39 @@ const TK = new URLSearchParams(location.search).get('token') || '';
 const TKQ = TK ? ('?token=' + encodeURIComponent(TK)) : '';
 const AUTH = TK ? {'X-Auth-Token': TK} : {};
 
+let ADAPTER = {};          // 包名 -> {name, role, policy, note}
+
+function label(pkg){
+  const a = ADAPTER[pkg];
+  return (a && a.name) ? a.name : pkg;
+}
+
+function policyTag(pkg){
+  const a = ADAPTER[pkg];
+  if(!a || !a.policy) return '';
+  const text = {avoid:'禁止', keep:'', optional:'可停', bloat:'建议停'}[a.policy] || '';
+  if(!text) return '';
+  const cls = a.policy === 'avoid' ? 'bad' : (a.policy === 'bloat' ? 'warn' : '');
+  return ` <span class="pill" ${cls ? `style="color:var(--${cls})"` : ''} title="${esc(a.note || '')}">${text}</span>`;
+}
+
+async function loadAdapter(){
+  try{
+    const d = await (await fetch('/api/adapter' + TKQ, {headers: AUTH})).json();
+    ADAPTER = d.packages || {};
+    const el = $('adp');
+    if(d.matched){
+      el.textContent = '适配器 ' + d.matched;
+      el.title = (d.name || '') + (d.reference_device ? '\n参考机型：' + d.reference_device : '');
+      el.style.color = 'var(--ok)';
+    }else{
+      el.textContent = '适配器 未适配';
+      el.title = '当前机型没有适配器，显示原始包名。可参考 adapters/_template.json 新增。';
+      el.style.color = 'var(--warn)';
+    }
+  }catch(e){}
+}
+
 function applyTheme(t){
   document.documentElement.dataset.theme = t;
   try{ localStorage.setItem('tvtheme', t); }catch(e){}
@@ -199,10 +233,10 @@ async function refresh(){
     const c = d.castbay || {};
     $('cb').innerHTML = row('已安装', c.installed ? '是' : '否') + row('运行中', c.running ? '是 (PID ' + c.pid + ')' : '否')
       + row('接收端口', c.port || '未监听') + row('白名单', (d.whitelist||[]).includes('com.weenas.castbay') ? '已在' : '不在');
-    $('proc').innerHTML = (d.processes||[]).map(x => `<li>${esc(x.name)} <span class="pill">${x.rss_mb}MB</span></li>`).join('');
-    $('svc').innerHTML = (d.services||[]).map(s => `<li>${esc(s.pkg)} <span class="dim">${esc(s.svc)}</span></li>`).join('');
+    $('proc').innerHTML = (d.processes||[]).map(x => `<li title="${esc(x.name)}">${esc(label(x.name))} <span class="dim" style="font-size:11px">${esc(x.name)}</span> <span class="pill">${x.rss_mb}MB</span></li>`).join('');
+    $('svc').innerHTML = (d.services||[]).map(s => `<li title="${esc(s.pkg)}${esc(s.svc)}">${esc(label(s.pkg))}${policyTag(s.pkg)} <span class="dim" style="font-size:11px">${esc(s.svc)}</span></li>`).join('');
     $('svcN').textContent = (d.services||[]).length + ' 项';
-    $('boot').innerHTML = (d.boot||[]).map(x => `<li>${esc(x)}</li>`).join('');
+    $('boot').innerHTML = (d.boot||[]).map(x => `<li title="${esc(x)}">${esc(label(x))}${policyTag(x)} <span class="dim" style="font-size:11px">${esc(x)}</span></li>`).join('');
     $('bootN').textContent = (d.boot||[]).length + ' 个应用';
     $('wl').innerHTML = (d.whitelist||[]).map(x => `<li>${esc(x)}</li>`).join('') || '<li class="dim">空</li>';
   }catch(e){
@@ -316,7 +350,7 @@ async function loadApps(){
     $('appN').textContent = items.length + ' 个';
     $('applist').innerHTML = items.map(a => `
       <li class="approw">
-        <span class="pkg">${esc(a.pkg)}${a.system ? ' <span class="pill">系统</span>' : ''}</span>
+        <span class="pkg" title="${esc(a.pkg)}">${esc(label(a.pkg))}${a.system ? ' <span class="pill">系统</span>' : ''} <span class="dim" style="font-size:11px">${esc(a.pkg)}</span></span>
         <span class="vf">${a.versionCode ? 'v' + a.versionCode : ''}</span>
         <button onclick="appAct('${a.pkg}','open')">打开</button>
         <button onclick="appAct('${a.pkg}','stop')">停止</button>
@@ -411,7 +445,7 @@ async function loadDevices(){
 async function switchDevice(id){
   if(!id) return;
   const r = await apiDevices({action:'select', id});
-  if(r && r.ok){ await loadDevices(); refresh(); }
+  if(r && r.ok){ await loadAdapter(); await loadDevices(); refresh(); }
 }
 
 async function addDevice(){
@@ -426,7 +460,7 @@ async function addDevice(){
 async function removeDevice(id){
   if(!confirm('删除该设备？')) return;
   const r = await apiDevices({action:'remove', id});
-  if(r && r.ok){ await loadDevices(); refresh(); }
+  if(r && r.ok){ await loadAdapter(); await loadDevices(); refresh(); }
 }
 
 function openManage(){ $('modal').style.display='flex'; loadDevices(); }
@@ -435,6 +469,7 @@ function closeManage(){ $('modal').style.display='none'; }
 $('screen').src = '/api/screen' + TKQ;
 refresh();
 loadSettings();
+loadAdapter();
 loadDevices();
 loadApps();
 checkUpdate();

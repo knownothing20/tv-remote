@@ -20,6 +20,7 @@ Write-Host "==> PyInstaller 打包" -ForegroundColor Cyan
     --name $Name `
     --icon "assets/icons/tv_on.ico" `
     --add-data "src/tvremote/web;web" `
+    --add-data "src/tvremote/adapters;tvremote/adapters" `
     --paths src `
     --hidden-import pystray._win32 `
     --hidden-import pystray._base `

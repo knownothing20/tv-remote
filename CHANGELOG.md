@@ -3,6 +3,23 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.6.0] - 2026-11-13
+
+机型适配器（package → 中文名）。
+
+### Added
+
+- `src/tvremote/adapters/<id>.json`：按 `ro.product.model` / `ro.product.brand` 匹配机型的包名映射表，
+  每条含中文名、角色（system/tcl/media/thirdparty）与处置策略（avoid/keep/optional/bloat）
+- 面板：进程 Top、后台服务、自启动、应用列表都显示中文名 + 策略标签（悬停看说明），头部显示当前适配器
+- `GET /api/adapter`；`/api/status` 增加 `adapter` 字段
+- 内置 `tcl_mt5879_cn`（57 条，参考机型 TCL 65Q10K / MT5879 / Android 11）
+- `adapters/_template.json` 与 `docs/ADAPTERS.md`（新增机型约 20 分钟）
+
+### Changed
+
+- 打包脚本增加 `--add-data src/tvremote/adapters`，exe 内置适配器数据
+
 ## [1.5.9] - 2026-11-13
 
 ### Added

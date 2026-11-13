@@ -3,7 +3,7 @@
 > 仓库：<https://github.com/knownothing20/tv-remote> · 最新版见 [Releases](https://github.com/knownothing20/tv-remote/releases)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-1.5.9-blue)
+![Version](https://img.shields.io/badge/version-1.6.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3.11)
 
@@ -27,6 +27,7 @@
 | 应用管理 | 应用列表 / 搜索、打开 / 停止 / 停用 / 清数据 / 卸载（含保护名单） |
 | PWA | 可添加到主屏；浅色/深色主题；内存趋势曲线 |
 | 守护 | 接收端未运行时静默拉起；**投屏时自动切前台**（否则只有声音没有画面） |
+| 机型适配器 | 包名 → 中文名 / 角色 / 是否可停用，按机型 JSON 匹配（[docs/ADAPTERS.md](docs/ADAPTERS.md)） |
 | 托盘 | 右键菜单：打开面板 / 复制地址 / 重启服务 / 退出（退出即停服务） |
 
 ## 快速开始
@@ -181,6 +182,7 @@ tv-remote/
 | POST | `/api/app` | 应用操作：`open` / `stop` / `disable` / `enable` / `clear` / `uninstall` |
 | GET | `/api/update` | 查询 GitHub Releases 是否有新版本（30 分钟缓存） |
 | GET | `/api/history` | 最近 3 分钟内存采样（趋势图数据） |
+| GET | `/api/adapter` | 命中机型的包名映射表（中文名 / 策略） |
 | GET / POST | `/api/settings` | 读取 / 修改界面设置（`mask_sensitive`、`refresh_seconds`） |
 | GET | `/api/status` | 全量状态 JSON（硬件、内存、存储、网络、进程、服务、自启动…） |
 | GET | `/api/screen` | MJPEG 实时画面（单路，多路会返回 429） |

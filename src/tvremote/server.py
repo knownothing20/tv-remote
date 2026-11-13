@@ -10,7 +10,7 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
-from . import __version__, privacy
+from . import __version__, adapters, privacy
 from .adb import Adb
 from .config import (
     Config,
@@ -449,6 +449,11 @@ def get_history() -> list:
         return list(_history)
 
 
+def adapter_payload() -> dict:
+    """当前设备命中的机型适配器（包名 -> 中文名 / 角色 / 策略）。"""
+    return cached("adapter", 600, lambda: adapters.payload(get_props()))
+
+
 def get_whitelist() -> list:
     return [l.split(",")[1] for l in sh("cmd deviceidle whitelist", timeout=10).splitlines() if l.count(",") >= 1]
 
@@ -576,6 +581,7 @@ def collect_status() -> dict:
     if not st["online"]:
         return privacy.apply_status(st, mask)
     st["props"] = get_props()
+    st["adapter"] = adapter_payload().get("matched", "")
     st["mem"] = get_mem()
     _record_history(st["mem"])
     st["uptime"] = get_uptime()
@@ -704,6 +710,8 @@ class Handler(BaseHTTPRequestHandler):
             scope = qs.get("scope", ["third"])[0] or "third"
             query = qs.get("q", [""])[0]
             self._send(200, json.dumps({"items": get_apps(scope, query)}, ensure_ascii=False))
+        elif path == "/api/adapter":
+            self._send(200, json.dumps(adapter_payload(), ensure_ascii=False))
         elif path == "/api/update":
             self._send(200, json.dumps(get_update_info(), ensure_ascii=False))
         elif path == "/api/history":
