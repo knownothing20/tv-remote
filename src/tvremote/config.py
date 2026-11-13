@@ -18,8 +18,10 @@ from __future__ import annotations
 
 import json
 import os
+import socket
 import sys
 from dataclasses import asdict, dataclass, fields
+from functools import lru_cache
 
 DEFAULTS = {
     "device": "192.168.1.10:5555",
@@ -168,12 +170,43 @@ class Config:
 
     @property
     def url(self) -> str:
+        """本机访问地址（内部轮询用，永远是回环）。"""
         host = "127.0.0.1" if self.host in ("0.0.0.0", "", "::") else self.host
         return f"http://{host}:{self.port}"
 
     @property
+    def public_url(self) -> str:
+        """对外地址：监听 0.0.0.0 时用本机局域网 IP，方便直接分享给 iPad / 手机。"""
+        if self.lan:
+            return f"http://{lan_ip()}:{self.port}"
+        return self.url
+
+    @property
     def lan(self) -> bool:
         return self.host not in ("127.0.0.1", "localhost", "")
+
+
+@lru_cache(maxsize=1)
+def lan_ip() -> str:
+    """取本机出口网卡的 IPv4（UDP connect 不会真的发包）。"""
+    for target in (("223.5.5.5", 53), ("8.8.8.8", 80)):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.settimeout(0.5)
+            s.connect(target)
+            ip = s.getsockname()[0]
+            s.close()
+            if ip and not ip.startswith("127."):
+                return ip
+        except Exception:
+            continue
+    try:
+        ip = socket.gethostbyname(socket.gethostname())
+        if ip and not ip.startswith("127."):
+            return ip
+    except Exception:
+        pass
+    return "127.0.0.1"
 
 
 @dataclass

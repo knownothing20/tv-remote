@@ -3,6 +3,15 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.5.6] - 2026-11-13
+
+### Changed
+
+- 监听 `0.0.0.0`（局域网模式）时，托盘「打开管理后台」「复制访问地址」「设备管理」
+  改用**本机局域网 IP**（新增 `Config.public_url` 与 `lan_ip()`），不再是 `127.0.0.1`，
+  复制出来即可直接发给 iPad / 手机。
+- 内部心跳轮询仍走 `127.0.0.1`，不受防火墙与网卡切换影响。
+
 ## [1.5.5] - 2026-11-13
 
 ### Fixed

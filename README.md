@@ -3,7 +3,7 @@
 > 仓库：<https://github.com/knownothing20/tv-remote> · 最新版见 [Releases](https://github.com/knownothing20/tv-remote/releases)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-1.5.5-blue)
+![Version](https://img.shields.io/badge/version-1.5.6-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3.11)
 
@@ -61,7 +61,7 @@ python main.py --export-icons assets/icons
 ```
 
 访问 `http://<电脑IP>:8777`。暴露到局域网时建议同时设置 `token`，
-之后地址为 `http://<电脑IP>:8777/?token=你的口令`（托盘右键「打开管理后台」会自动带上口令）。
+之后地址为 `http://<电脑IP>:8777/?token=你的口令`（托盘右键「打开管理后台」会自动使用局域网 IP 并带上口令，复制即可分享）。
 
 ### Docker（推荐常开）
 

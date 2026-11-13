@@ -93,8 +93,8 @@ def copy_clip(text: str) -> bool:
 
 
 def dashboard_url(config: Config, extra: str = "") -> str:
-    """面板地址：自动附带访问口令，避免开启 token 后被 401 挡住。"""
-    url = config.url + "/"
+    """面板地址：监听 0.0.0.0 时用局域网 IP，并自动附带访问口令。"""
+    url = config.public_url + "/"
     if config.token:
         url += "?token=" + quote(config.token)
         if extra:
