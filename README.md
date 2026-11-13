@@ -3,7 +3,7 @@
 > 仓库：<https://github.com/knownothing20/tv-remote> · 最新版见 [Releases](https://github.com/knownothing20/tv-remote/releases)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-1.2.0-blue)
+![Version](https://img.shields.io/badge/version-1.3.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3.11)
 
@@ -24,6 +24,7 @@
 | 自启动 | 解析 `dumpsys package`，列出监听 `BOOT_COMPLETED` 的应用 |
 | 实时画面 | MJPEG 流，约 1 帧/秒（受电视 `screencap` 速度限制） |
 | 快捷操作 | 打开指定投屏 App、回桌面、返回键、加省电白名单、保存截图 |
+| 应用管理 | 应用列表 / 搜索、打开 / 停止 / 停用 / 清数据 / 卸载（含保护名单） |
 | 托盘 | 右键菜单：打开面板 / 复制地址 / 重启服务 / 退出（退出即停服务） |
 
 ## 快速开始
@@ -164,6 +165,8 @@ tv-remote/
 | GET | `/` | 面板页面 |
 | GET | `/api/ping` | 轻量心跳：`{"server":true,"tv":true}`（托盘图标用它） |
 | GET / POST | `/api/devices` | 设备列表 / 切换 / 新增 / 删除 |
+| GET | `/api/apps` | 已安装应用（`scope=third\|all`、`q=` 搜索） |
+| POST | `/api/app` | 应用操作：`open` / `stop` / `disable` / `enable` / `clear` / `uninstall` |
 | GET / POST | `/api/settings` | 读取 / 修改界面设置（`mask_sensitive`、`refresh_seconds`） |
 | GET | `/api/status` | 全量状态 JSON（硬件、内存、存储、网络、进程、服务、自启动…） |
 | GET | `/api/screen` | MJPEG 实时画面（单路，多路会返回 429） |
@@ -197,8 +200,8 @@ powershell -ExecutionPolicy Bypass -File scripts/build.ps1
 | 版本 | 主题 |
 |---|---|
 | v1.1.0 | 局域网访问 + Docker ✔ |
-| v1.2.0 | **多设备管理 ✔ 已发布** |
-| v1.3.0 | 应用管理（卸载 / 停用 / 清数据 / 自启动开关） |
+| v1.2.0 | 多设备管理 ✔ |
+| v1.3.0 | **应用管理 ✔ 已发布** |
 | v1.4.0 | 更新检查（只提示，不自动下载） |
 | v1.5.0 | 面板体验（PWA / 主题切换 / 趋势图表） |
 | v2.0.0 | 采集器插件化 + macOS / Linux 托盘 |

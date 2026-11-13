@@ -3,6 +3,18 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。版本策略与路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
+## [1.3.0] - 2026-11-13
+
+应用管理。
+
+### Added
+
+- 面板新增「应用管理」卡片：按包名搜索、第三方 / 全部应用切换
+- 应用操作：打开、停止、停用、启用、清除数据、卸载（`pm` / `am`）
+- 危险操作二次确认；关键系统组件（systemui / settings / packageinstaller 等）加入保护名单
+- `GET /api/apps?scope=third|all&q=`、`POST /api/app`（cmd: open/stop/disable/enable/clear/uninstall）
+- 包名白名单校验，拒绝非 `[A-Za-z0-9_.]` 输入
+
 ## [1.2.0] - 2026-11-13
 
 多设备管理。

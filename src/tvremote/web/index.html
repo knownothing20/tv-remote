@@ -50,6 +50,13 @@ input.ipt{background:#0d1117;color:var(--txt);border:1px solid #30363d;border-ra
 .addrow{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:12px}
 button.mini{padding:5px 10px;font-size:12px}
 button.danger{color:#f85149;border-color:#6e2c2c}
+.appbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.applist{max-height:320px}
+.approw{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed #1d2229;font-size:12.5px}
+.approw .pkg{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.approw .vf{color:var(--dim);font-size:11px;white-space:nowrap}
+.approw button{padding:3px 8px;font-size:11px}
+.approw button:disabled{opacity:.35;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -78,6 +85,20 @@ button.danger{color:#f85149;border-color:#6e2c2c}
       <button onclick="act('whitelist')">加白名单</button>
       <button onclick="act('screenshot')">保存截图</button>
     </div>
+  </div>
+
+  <div class="card" style="grid-column:span 2;min-width:320px">
+    <h2>应用管理 <span class="pill" id="appN">—</span></h2>
+    <div class="appbar">
+      <input class="ipt" id="appq" placeholder="搜索包名，如 castbay" oninput="loadApps()" style="flex:1;min-width:160px">
+      <select class="sel" id="appscope" onchange="loadApps()">
+        <option value="third">第三方应用</option>
+        <option value="all">全部应用</option>
+      </select>
+      <button class="mini" onclick="loadApps()">刷新</button>
+    </div>
+    <ul id="applist" class="applist"></ul>
+    <div class="tag">卸载/停用走 <code>pm</code>，系统关键组件已加入保护名单；操作不可撤销，请谨慎。</div>
   </div>
 
   <div class="card"><h2>硬件信息</h2><div id="hw"></div></div>
@@ -187,6 +208,43 @@ async function toggleMask(on){
   refresh();
 }
 
+async function loadApps(){
+  const q = ($('appq').value || '').trim();
+  const scope = $('appscope').value || 'third';
+  try{
+    const params = new URLSearchParams({scope, q});
+    if(TK) params.set('token', TK);
+    const d = await (await fetch('/api/apps?' + params.toString(), {headers: AUTH})).json();
+    const items = d.items || [];
+    $('appN').textContent = items.length + ' 个';
+    $('applist').innerHTML = items.map(a => `
+      <li class="approw">
+        <span class="pkg">${esc(a.pkg)}${a.system ? ' <span class="pill">系统</span>' : ''}</span>
+        <span class="vf">${a.versionCode ? 'v' + a.versionCode : ''}</span>
+        <button onclick="appAct('${a.pkg}','open')">打开</button>
+        <button onclick="appAct('${a.pkg}','stop')">停止</button>
+        <button onclick="appAct('${a.pkg}','disable')" ${a.blocked?'disabled':''}>停用</button>
+        <button class="danger" onclick="appAct('${a.pkg}','uninstall')" ${a.blocked?'disabled':''}>卸载</button>
+      </li>`).join('') || '<li class="dim">无匹配应用</li>';
+  }catch(e){
+    $('applist').innerHTML = '<li class="dim">读取失败（设备可能离线）</li>';
+  }
+}
+
+async function appAct(pkg, cmd){
+  if(cmd === 'uninstall' && !confirm(`确定卸载 ${pkg}？`)) return;
+  if(cmd === 'disable' && !confirm(`确定停用 ${pkg}？停用后它会从桌面消失。`)) return;
+  const r = await fetch('/api/app' + TKQ, {
+    method: 'POST',
+    headers: Object.assign({'Content-Type': 'application/json'}, AUTH),
+    body: JSON.stringify({cmd, pkg})
+  });
+  const d = await r.json();
+  if(!d.ok) alert(d.msg || '操作失败');
+  loadApps();
+  refresh();
+}
+
 async function apiDevices(payload){
   const opt = payload ? {method:'POST', headers: Object.assign({'Content-Type':'application/json'}, AUTH), body: JSON.stringify(payload)} : {};
   const r = await fetch('/api/devices' + TKQ, opt);
@@ -236,6 +294,7 @@ $('screen').src = '/api/screen' + TKQ;
 refresh();
 loadSettings();
 loadDevices();
+loadApps();
 if(new URLSearchParams(location.search).get('manage')) setTimeout(openManage, 300);
 </script>
 </body>

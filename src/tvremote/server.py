@@ -8,7 +8,7 @@ import re
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from . import __version__, privacy
 from .adb import Adb
@@ -300,6 +300,84 @@ def warmup():
     threading.Thread(target=_load_boot, daemon=True).start()
 
 
+BLOCKED_PACKAGES = {
+    "android",
+    "com.android.systemui",
+    "com.android.settings",
+    "com.android.packageinstaller",
+    "com.android.permissioncontroller",
+    "com.android.providers.settings",
+    "com.google.android.gms",
+    "com.tcl.systemserver",
+}
+
+_APP_NAME_RE = re.compile(r"^[A-Za-z0-9_.]+$")
+
+
+def get_apps(scope: str = "third", query: str = "") -> list:
+    """已安装应用列表（含版本号与是否系统应用），30 秒缓存。"""
+
+    def _collect() -> dict:
+        third = set(re.findall(r"package:([\w.]+)", sh("pm list packages -3", timeout=30)))
+        raw = sh("pm list packages --show-versioncode", timeout=40)
+        items, seen = [], set()
+        for line in raw.splitlines():
+            m = re.match(r"package:([\w.]+)(?:\s+versionCode:(\d+))?", line.strip())
+            if not m:
+                continue
+            pkg = m.group(1)
+            if pkg in seen:
+                continue
+            seen.add(pkg)
+            items.append({
+                "pkg": pkg,
+                "versionCode": m.group(2) or "",
+                "system": pkg not in third,
+                "blocked": pkg in BLOCKED_PACKAGES,
+            })
+        items.sort(key=lambda a: a["pkg"])
+        return {"items": items}
+
+    items = cached("apps", 30, _collect)["items"]
+    if scope == "third":
+        items = [a for a in items if not a["system"]]
+    if query:
+        q = query.lower()
+        items = [a for a in items if q in a["pkg"].lower()]
+    return items
+
+
+def do_app_action(cmd: str, pkg: str) -> dict:
+    pkg = (pkg or "").strip()
+    if not pkg or not _APP_NAME_RE.match(pkg):
+        return {"ok": False, "msg": "包名非法"}
+
+    if cmd in {"uninstall", "disable", "clear"} and pkg in BLOCKED_PACKAGES:
+        return {"ok": False, "msg": "受保护的系统组件，已拒绝执行"}
+
+    commands = {
+        "open": ("monkey -p %s 1", "已尝试启动"),
+        "stop": ("am force-stop %s", "已停止"),
+        "disable": ("pm disable-user --user 0 %s", "已停用"),
+        "enable": ("pm enable %s", "已启用"),
+        "clear": ("pm clear %s", "已清除数据"),
+        "uninstall": ("pm uninstall --user 0 %s", "已卸载"),
+    }
+    if cmd not in commands:
+        return {"ok": False, "msg": "未知操作"}
+
+    tpl, label = commands[cmd]
+    out = sh(tpl % pkg, timeout=40)
+    installed = pkg in sh(f"pm list packages {pkg}", timeout=15)
+    with _cache_lock:
+        _cache.pop("apps", None)
+    return {
+        "ok": ("Exception" not in out and "Error" not in out),
+        "msg": f"{label}：{out[:120] or 'ok'}",
+        "installed": installed,
+    }
+
+
 def get_whitelist() -> list:
     return [l.split(",")[1] for l in sh("cmd deviceidle whitelist", timeout=10).splitlines() if l.count(",") >= 1]
 
@@ -434,6 +512,11 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, json.dumps({"server": True, "tv": online}))
         elif path == "/api/devices":
             self._send(200, json.dumps(devices_payload(), ensure_ascii=False))
+        elif path == "/api/apps":
+            qs = parse_qs(urlparse(self.path).query)
+            scope = qs.get("scope", ["third"])[0] or "third"
+            query = qs.get("q", [""])[0]
+            self._send(200, json.dumps({"items": get_apps(scope, query)}, ensure_ascii=False))
         elif path == "/api/settings":
             s = load_settings()
             self._send(200, json.dumps({
@@ -458,6 +541,11 @@ class Handler(BaseHTTPRequestHandler):
 
         if path == "/api/devices":
             self._send(200, json.dumps(handle_device_action(body), ensure_ascii=False))
+            return
+
+        if path == "/api/app":
+            self._send(200, json.dumps(
+                do_app_action(body.get("cmd", ""), body.get("pkg", "")), ensure_ascii=False))
             return
 
         if path == "/api/settings":
